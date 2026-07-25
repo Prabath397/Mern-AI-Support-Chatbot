@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            server/package-lock.json
+            client/package-lock.json
+
+      - name: Install server dependencies
+        run: npm ci
+        working-directory: server
+
+      - name: Run server tests
+        run: npm test
+        working-directory: server
+        env:
+          NODE_ENV: test
+          JWT_SECRET: test_secret_for_ci_only
+          CLIENT_URL: http://localhost:5173
+
+      - name: Install client dependencies
+        run: npm ci
+        working-directory: client
+
+      - name: Run client tests
+        run: npm test
+        working-directory: client
+
+      - name: Build client
+        run: npm run build
+        working-directory: client
