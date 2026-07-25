@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import mammoth from "mammoth";
-import pdfParse from "pdf-parse";
+import { PDFParse } from "pdf-parse";
 
 const TEXT_LIMIT = 12000;
 
@@ -19,8 +19,13 @@ async function extractText(file) {
 
   if (file.mimetype === "application/pdf") {
     const buffer = await fs.readFile(file.path);
-    const parsed = await pdfParse(buffer);
-    return truncate(parsed.text);
+    const parser = new PDFParse({ data: buffer });
+    try {
+      const parsed = await parser.getText();
+      return truncate(parsed.text);
+    } finally {
+      await parser.destroy();
+    }
   }
 
   if (
