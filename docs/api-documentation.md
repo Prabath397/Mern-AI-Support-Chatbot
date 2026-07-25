@@ -32,6 +32,7 @@ Core endpoints:
 - `GET /api/conversations/:id/messages` returns ordered messages.
 - `POST /api/conversations/:id/messages` saves a user message.
 - `POST /api/chat` sends a user message and returns assistant response.
+- `GET /api/attachments/messages/:messageId/attachments/:attachmentId` downloads an owned message attachment.
 - `GET /api/admin/dashboard` returns counts and analytics.
 - `GET /api/admin/users` returns users.
 - `PATCH /api/admin/users/:id/status` activates or deactivates a user.

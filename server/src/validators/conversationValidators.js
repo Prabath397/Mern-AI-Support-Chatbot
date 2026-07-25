@@ -1,4 +1,5 @@
 import { body, param } from "express-validator";
+import { ApiError } from "../utils/ApiError.js";
 
 export const conversationIdParam = [
   param("id").isMongoId().withMessage("Invalid conversation id."),
@@ -34,7 +35,18 @@ export const chatValidator = [
     .isMongoId()
     .withMessage("Invalid conversation id."),
   body("content")
+    .optional()
     .trim()
-    .isLength({ min: 1, max: 20000 })
-    .withMessage("Message content is required."),
+    .isLength({ max: 20000 })
+    .withMessage("Message content must be 20,000 characters or less."),
 ];
+
+export function requireChatContent(req, _res, next) {
+  req.body.content = (req.body.content || "").trim();
+  if (!req.body.content && !req.files?.length) {
+    return next(
+      new ApiError(400, "Message content or an attachment is required."),
+    );
+  }
+  next();
+}

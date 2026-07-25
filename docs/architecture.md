@@ -13,5 +13,6 @@ Data flow:
 3. Express verifies the JWT and active user status.
 4. The conversation ownership is verified or a new conversation is created.
 5. The user message is stored.
-6. Recent history and the saved system prompt are passed to the AI service.
-7. The assistant message is stored and returned to the client.
+6. Optional attachments are stored privately, with text extracted from TXT, Markdown, CSV, JSON, PDF, and DOCX files.
+7. Recent history, attachment context, and the saved system prompt are passed to the AI service.
+8. The assistant message is stored and returned to the client.

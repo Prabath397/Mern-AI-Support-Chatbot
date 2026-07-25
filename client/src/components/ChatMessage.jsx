@@ -3,6 +3,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import hljs from "highlight.js";
 import "highlight.js/styles/github-dark.css";
+import { chatService } from "../services/chatService.js";
 
 function CodeBlock({ className, children, ...props }) {
   const language = /language-(\w+)/.exec(className || "")?.[1];
@@ -31,6 +32,19 @@ export default function ChatMessage({ message }) {
     setTimeout(() => setCopied(false), 1600);
   }
 
+  async function downloadAttachment(attachment) {
+    const response = await chatService.downloadAttachment(
+      message._id,
+      attachment._id,
+    );
+    const url = URL.createObjectURL(response.data);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = attachment.originalName;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <article className={`chat-message ${message.role}`}>
       <div className="message-meta">
@@ -53,6 +67,25 @@ export default function ChatMessage({ message }) {
           <p>{message.content}</p>
         )}
       </div>
+      {message.attachments?.length ? (
+        <div className="attachment-list" aria-label="Message attachments">
+          {message.attachments.map((attachment) => (
+            <button
+              key={attachment._id}
+              type="button"
+              onClick={() => downloadAttachment(attachment)}
+              className="attachment-chip"
+              title={
+                attachment.hasExtractedText
+                  ? "Text was extracted for AI context"
+                  : "Download attachment"
+              }
+            >
+              {attachment.originalName}
+            </button>
+          ))}
+        </div>
+      ) : null}
     </article>
   );
 }

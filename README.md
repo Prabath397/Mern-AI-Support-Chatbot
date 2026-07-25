@@ -16,6 +16,8 @@ SupportSphere AI is a portfolio-quality MERN customer support chatbot. It demons
 - Create, list, rename, delete, and load conversations
 - Save and retrieve ordered message history
 - Chat endpoint with backend-only AI provider abstraction and mock fallback
+- TXT, Markdown, CSV, JSON, PDF, DOCX, and image attachments on chat messages
+- Text extraction from document attachments so the AI can answer with uploaded context
 - Markdown and code block rendering with copy actions
 - Light/dark mode, loading, error, and empty states
 - Admin dashboard with totals, recent users, user status controls, and system instructions
@@ -66,6 +68,7 @@ Copy `server/.env.example` to `server/.env` if needed and replace placeholders:
 MONGO_URI=mongodb+srv://USERNAME:PASSWORD@CLUSTER.mongodb.net/supportsphere_ai
 JWT_SECRET=replace_with_a_long_random_secret
 AI_PROVIDER=mock
+AI_BASE_URL=https://api.openai.com/v1
 AI_API_KEY=
 ```
 
@@ -111,6 +114,7 @@ npm run build --prefix client
 - `GET /api/conversations/:id/messages`
 - `POST /api/conversations/:id/messages`
 - `POST /api/chat`
+- `GET /api/attachments/messages/:messageId/attachments/:attachmentId`
 - `GET /api/admin/dashboard`
 - `GET /api/admin/users`
 - `PATCH /api/admin/users/:id/status`

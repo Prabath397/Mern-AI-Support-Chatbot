@@ -7,6 +7,8 @@
 - Inactive users cannot authenticate or continue using protected routes.
 - Admin routes require both authentication and admin role authorization.
 - Conversations are always looked up by both id and owner.
+- Attachment downloads require authentication and conversation ownership.
+- Attachment uploads are limited by file count, size, and MIME type.
 - Helmet sets secure HTTP headers.
 - CORS restricts origins through `CLIENT_URL`.
 - JSON body size is limited to 1 MB.

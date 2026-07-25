@@ -18,7 +18,8 @@ function mockReply(content) {
 }
 
 async function callOpenAiCompatibleProvider({ messages, systemPrompt }) {
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+  const baseUrl = env.aiBaseUrl.replace(/\/$/, "");
+  const response = await fetch(`${baseUrl}/chat/completions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -35,7 +36,10 @@ async function callOpenAiCompatibleProvider({ messages, systemPrompt }) {
   });
 
   if (!response.ok) {
-    throw new Error("AI provider request failed.");
+    const errorText = await response.text();
+    throw new Error(
+      `AI provider request failed with ${response.status}: ${errorText.slice(0, 300)}`,
+    );
   }
 
   const data = await response.json();

@@ -12,8 +12,11 @@ export const env = {
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || "7d",
   clientUrl: process.env.CLIENT_URL || "http://localhost:5173",
   aiProvider: process.env.AI_PROVIDER || "mock",
+  aiBaseUrl: process.env.AI_BASE_URL || "https://api.openai.com/v1",
   aiApiKey: process.env.AI_API_KEY || "",
   aiModel: process.env.AI_MODEL || "",
+  uploadDir: process.env.UPLOAD_DIR || "uploads",
+  maxFileSizeMb: Number(process.env.MAX_FILE_SIZE_MB || 8),
   isProduction: process.env.NODE_ENV === "production",
   isTest: process.env.NODE_ENV === "test",
 };

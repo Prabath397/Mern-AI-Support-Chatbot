@@ -57,13 +57,14 @@ export default function ChatPage() {
     setMessages([]);
   }
 
-  async function send(content) {
+  async function send(content, files = []) {
     setSending(true);
     setError("");
     try {
       const res = await chatService.sendMessage({
         conversationId: activeId || undefined,
         content,
+        files,
       });
       const { conversation, messages: newMessages } = res.data.data;
       setActiveId(conversation._id);
@@ -129,10 +130,6 @@ export default function ChatPage() {
                 ? conversations.find((item) => item._id === activeId)?.title
                 : "New support chat"}
             </h1>
-            <p>
-              Backend AI provider: mock fallback unless configured on the
-              server.
-            </p>
           </div>
         </div>
         <ErrorAlert message={error} />

@@ -13,6 +13,7 @@ Set:
 - `JWT_EXPIRES_IN`
 - `CLIENT_URL`
 - `AI_PROVIDER`
+- `AI_BASE_URL`
 - `AI_API_KEY`
 - `AI_MODEL`
 
@@ -48,6 +49,7 @@ The default provider is `mock`. To connect a real OpenAI-compatible provider lat
 
 ```env
 AI_PROVIDER=openai
+AI_BASE_URL=https://api.openai.com/v1
 AI_API_KEY=your_provider_key
 AI_MODEL=gpt-4.1-mini
 ```

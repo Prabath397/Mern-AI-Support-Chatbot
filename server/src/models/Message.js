@@ -24,6 +24,16 @@ const messageSchema = new mongoose.Schema(
       completion: { type: Number, default: 0 },
       total: { type: Number, default: 0 },
     },
+    attachments: [
+      {
+        originalName: { type: String, required: true, trim: true },
+        storedName: { type: String, required: true },
+        mimeType: { type: String, required: true },
+        size: { type: Number, required: true },
+        path: { type: String, required: true },
+        extractedText: { type: String, default: "" },
+      },
+    ],
   },
   { timestamps: true },
 );
@@ -32,6 +42,18 @@ messageSchema.index({ conversation: 1, createdAt: 1 });
 
 messageSchema.methods.toJSON = function toJSON() {
   const message = this.toObject();
+  if (message.attachments) {
+    message.attachments = message.attachments.map((attachment) => {
+      const hasExtractedText = Boolean(attachment.extractedText);
+      delete attachment.path;
+      delete attachment.extractedText;
+      delete attachment.__v;
+      return {
+        ...attachment,
+        hasExtractedText,
+      };
+    });
+  }
   delete message.__v;
   return message;
 };

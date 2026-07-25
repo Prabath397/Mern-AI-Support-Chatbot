@@ -38,6 +38,15 @@ export function errorHandler(error, _req, res, _next) {
     details = Object.values(error.errors).map((item) => item.message);
   }
 
+  if (error.name === "MulterError") {
+    statusCode = 400;
+    message =
+      error.code === "LIMIT_FILE_SIZE"
+        ? "Attachment is too large."
+        : "Attachment upload failed.";
+    details = null;
+  }
+
   if (statusCode === 500 && env.isProduction) {
     message = "Something went wrong. Please try again later.";
     details = null;

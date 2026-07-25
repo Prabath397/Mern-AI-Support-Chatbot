@@ -1,6 +1,7 @@
 import { Conversation } from "../models/Conversation.js";
 import { Message } from "../models/Message.js";
 import { findOwnedConversation } from "../middleware/ownership.js";
+import { deleteAttachmentFiles } from "../services/attachmentService.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { sendSuccess } from "../utils/responses.js";
 
@@ -34,6 +35,10 @@ export const updateConversation = asyncHandler(async (req, res) => {
 
 export const deleteConversation = asyncHandler(async (req, res) => {
   const conversation = await findOwnedConversation(req.user._id, req.params.id);
+  const messages = await Message.find({ conversation: conversation._id });
+  await deleteAttachmentFiles(
+    messages.flatMap((message) => message.attachments || []),
+  );
   await Message.deleteMany({ conversation: conversation._id });
   await conversation.deleteOne();
   sendSuccess(res, null, "Conversation deleted.");

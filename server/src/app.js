@@ -4,6 +4,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import { env } from "./config/env.js";
 import { adminRouter } from "./routes/adminRoutes.js";
+import { attachmentRouter } from "./routes/attachmentRoutes.js";
 import { authRouter } from "./routes/authRoutes.js";
 import { chatRouter } from "./routes/chatRoutes.js";
 import { conversationRouter } from "./routes/conversationRoutes.js";
@@ -32,6 +33,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/users", userRouter);
 app.use("/api/conversations", conversationRouter);
 app.use("/api/chat", chatRouter);
+app.use("/api/attachments", attachmentRouter);
 app.use("/api/admin", adminRouter);
 
 app.use(notFound);
