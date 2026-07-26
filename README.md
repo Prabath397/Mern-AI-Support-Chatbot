@@ -25,6 +25,28 @@ SupportSphere AI is a portfolio-quality MERN customer support chatbot. It demons
 
 ## Screenshots
 
+### Public Pages
+
+| Home Page                                               | Login Page                                                 | Register Page                                                    |
+| ------------------------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------- |
+| ![SupportSphere AI home page](screenshots/HomePage.png) | ![SupportSphere AI login page](screenshots/Login_Page.png) | ![SupportSphere AI register page](screenshots/Register_Page.png) |
+
+### Customer Experience
+
+| Customer Chat                                             | Customer Profile                                           |
+| --------------------------------------------------------- | ---------------------------------------------------------- |
+| ![Customer chat page](screenshots/Customer_Chat_Page.png) | ![Customer profile page](screenshots/Customer_Profile.png) |
+
+### Admin Experience
+
+| Admin Dashboard                                          | Admin Users                                      |
+| -------------------------------------------------------- | ------------------------------------------------ |
+| ![Admin dashboard page](screenshots/Admin_Dashboard.png) | ![Admin users page](screenshots/Admin_Users.png) |
+
+| Admin Settings                                         | Admin Profile                                        |
+| ------------------------------------------------------ | ---------------------------------------------------- |
+| ![Admin settings page](screenshots/Admin_Settings.png) | ![Admin profile page](screenshots/Admin_Profile.png) |
+
 ## Architecture
 
 The client talks to the Express API through `client/src/api/http.js`. The API validates requests, authenticates JWTs, checks ownership or admin authorization, stores data in MongoDB Atlas through Mongoose, and calls `server/src/services/aiService.js` for assistant responses. If no AI key is configured, the mock provider keeps the application runnable.
