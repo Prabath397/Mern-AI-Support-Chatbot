@@ -29,7 +29,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <section className="content-narrow">
+    <section className="content-narrow profile-panel">
       <h1>Profile</h1>
       <p>Manage the account details used by the chatbot workspace.</p>
       <ErrorAlert message={error} />

@@ -250,11 +250,19 @@ textarea:disabled {
   padding: 28px;
 }
 
+.profile-panel {
+  width: min(94vw, 560px);
+}
+
 .field,
 .panel-form,
 .chat-input {
   display: grid;
-  gap: 8px;
+  gap: 12px;
+}
+
+.panel-form {
+  margin-top: 18px;
 }
 
 .role-selector {
@@ -308,7 +316,7 @@ textarea {
   border-radius: 8px;
   background: var(--surface);
   color: var(--text);
-  padding: 12px 13px;
+  padding: 14px 13px;
 }
 
 .field-error,
