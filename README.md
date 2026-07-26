@@ -279,4 +279,4 @@ Portfolio: [https://prabath397.github.io/](https://prabath397.github.io/)
 
 ## License
 
-MIT
+This project is licensed under the [MIT License](LICENSE).
