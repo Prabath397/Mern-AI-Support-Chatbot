@@ -55,24 +55,50 @@ SupportSphere-AI/
 
 ## Local Installation
 
+From the project root:
+
 ```bash
-npm install --prefix server
-npm install --prefix client
+npm run install:all
+```
+
+Or install each app separately:
+
+```bash
+cd server
+npm install
+cd ../client
+npm install
 ```
 
 ## Environment Setup
 
-Copy `server/.env.example` to `server/.env` if needed and replace placeholders:
+Create or update `server/.env`. Never commit this file.
 
 ```env
-MONGO_URI=mongodb+srv://USERNAME:PASSWORD@CLUSTER.mongodb.net/supportsphere_ai
-JWT_SECRET=replace_with_a_long_random_secret
+PORT=5000
+NODE_ENV=development
+MONGO_URI=mongodb+srv://USERNAME:PASSWORD@cluster0.example.mongodb.net/supportsphere_ai?retryWrites=true&w=majority&appName=Cluster0
+JWT_SECRET=replace_with_a_long_random_secret_value
+JWT_EXPIRES_IN=7d
+CLIENT_URL=http://localhost:5173
 AI_PROVIDER=mock
 AI_BASE_URL=https://api.openai.com/v1
 AI_API_KEY=
+AI_MODEL=
+UPLOAD_DIR=uploads
+MAX_FILE_SIZE_MB=8
 ```
 
-The React client reads:
+For OpenRouter/free models, use this AI section instead:
+
+```env
+AI_PROVIDER=openrouter
+AI_BASE_URL=https://openrouter.ai/api/v1
+AI_API_KEY=your_openrouter_key
+AI_MODEL=inclusionai/ling-3.0-flash:free
+```
+
+The React client uses `client/.env.example`:
 
 ```env
 VITE_API_BASE_URL=http://localhost:5000/api
@@ -80,21 +106,58 @@ VITE_API_BASE_URL=http://localhost:5000/api
 
 ## Development Commands
 
-```bash
+Run the backend in terminal 1:
+
+```powershell
+cd C:\Users\Prabath\OneDrive\Desktop\SupportSphere-AI\server
+npm run dev
+```
+
+Run the frontend in terminal 2:
+
+```powershell
+cd C:\Users\Prabath\OneDrive\Desktop\SupportSphere-AI\client
+npm run dev
+```
+
+You can also run from the project root:
+
+```powershell
 npm run dev:server
 npm run dev:client
 ```
 
 Backend: `http://localhost:5000`  
+Backend health check: `http://localhost:5000/api/health`  
 Frontend: `http://localhost:5173`
 
+After changing `server/.env`, restart the backend. If nodemon is already running, type:
+
+```text
+rs
+```
+
+and press Enter.
+
 ## Testing Commands
+
+From the project root:
+
+```bash
+npm run lint
+npm test
+npm run build
+```
+
+Or run each command directly:
 
 ```bash
 npm test --prefix server
 npm test --prefix client
 npm run lint --prefix server
 npm run lint --prefix client
+npm run format --prefix server
+npm run format --prefix client
 npm run build --prefix client
 ```
 
