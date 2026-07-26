@@ -274,8 +274,8 @@ Secrets are ignored by Git. Passwords are hashed with bcryptjs. JWTs are read fr
 ## Author
 
 Created by: Your Name  
-GitHub: `https://github.com/your-username`  
-Portfolio: `https://your-portfolio.example.com`
+GitHub: `https://github.com/Prabath397`  
+Portfolio: `https://prabath397.github.io/`
 
 ## License
 
