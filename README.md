@@ -25,15 +25,6 @@ SupportSphere AI is a portfolio-quality MERN customer support chatbot. It demons
 
 ## Screenshots
 
-Add portfolio screenshots in `screenshots/`:
-
-- Landing page
-- Login and registration
-- Chat empty state
-- Active conversation with markdown and code
-- Admin dashboard
-- Admin settings
-
 ## Architecture
 
 The client talks to the Express API through `client/src/api/http.js`. The API validates requests, authenticates JWTs, checks ownership or admin authorization, stores data in MongoDB Atlas through Mongoose, and calls `server/src/services/aiService.js` for assistant responses. If no AI key is configured, the mock provider keeps the application runnable.
@@ -104,6 +95,33 @@ The React client uses `client/.env.example`:
 ```env
 VITE_API_BASE_URL=http://localhost:5000/api
 ```
+
+## Admin Access
+
+There are no hardcoded admin credentials in the source code. This is intentional so real passwords are never committed to GitHub.
+
+For local development, an admin account can use:
+
+```text
+Email: admin@supportsphere.local
+Password: set locally by the developer
+```
+
+To make any registered user an admin, update that user in MongoDB Atlas:
+
+```json
+{
+  "role": "admin"
+}
+```
+
+To reset the local admin password, run this from `server/` and replace `NewStrongPassword123!`:
+
+```powershell
+node -e "import('dotenv').then(async ({config})=>{config(); const mongoose=(await import('mongoose')).default; const bcrypt=(await import('bcryptjs')).default; await mongoose.connect(process.env.MONGO_URI); const hash=await bcrypt.hash('NewStrongPassword123!',12); await mongoose.connection.db.collection('users').updateOne({email:'admin@supportsphere.local'},{`$set:{password:hash,updatedAt:new Date()}}); await mongoose.disconnect(); console.log('Admin password updated');})"
+```
+
+Do not place the real admin password in this README or any committed file.
 
 ## Development Commands
 
@@ -194,6 +212,45 @@ docker compose up --build
 ```
 
 MongoDB is not started locally because MongoDB Atlas is used.
+
+## GitHub Publishing Guide
+
+Before pushing, confirm secrets and generated files are ignored:
+
+```bash
+git status
+git check-ignore -v server/.env
+git check-ignore -v server/node_modules
+git check-ignore -v client/node_modules
+git check-ignore -v client/dist
+```
+
+Run quality checks:
+
+```bash
+npm run lint
+npm test
+npm run build
+```
+
+Create an empty GitHub repository named `SupportSphere-AI`, then run these commands in Git Bash from the project root:
+
+```bash
+cd /c/Users/Prabath/OneDrive/Desktop/SupportSphere-AI
+git status
+git branch -M main
+git remote add origin https://github.com/YOUR_USERNAME/SupportSphere-AI.git
+git push -u origin main
+```
+
+If `origin` already exists, use:
+
+```bash
+git remote set-url origin https://github.com/YOUR_USERNAME/SupportSphere-AI.git
+git push -u origin main
+```
+
+Replace `YOUR_USERNAME` with your GitHub username. Do not push `.env`, API keys, MongoDB passwords, admin passwords, `node_modules`, `dist`, `uploads`, or logs.
 
 ## Deployment Overview
 
