@@ -27,6 +27,10 @@ describe("SupportSphere client", () => {
     ).toBeInTheDocument();
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /customer/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /admin/i })).toBeInTheDocument();
   });
 
   it("renders the registration form", () => {

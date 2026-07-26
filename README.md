@@ -12,6 +12,7 @@ SupportSphere AI is a portfolio-quality MERN customer support chatbot. It demons
 ## Features
 
 - Register, log in, log out, retrieve and update profile
+- Role-aware customer/admin login with correct dashboard redirection
 - JWT bearer authentication and admin-only routes
 - Create, list, rename, delete, and load conversations
 - Save and retrieve ordered message history

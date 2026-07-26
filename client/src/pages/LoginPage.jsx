@@ -8,8 +8,9 @@ import { useAsync } from "../hooks/useAsync.js";
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
-  const { login } = useAuth();
-  const { loading, error, run } = useAsync();
+  const [selectedRole, setSelectedRole] = useState("user");
+  const { login, logout } = useAuth();
+  const { loading, error, setError, run } = useAsync();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -22,8 +23,26 @@ export default function LoginPage() {
 
   async function submit(event) {
     event.preventDefault();
-    await run(() => login(form));
-    navigate(location.state?.from?.pathname || "/app", { replace: true });
+    const signedInUser = await run(() => login(form));
+
+    if (signedInUser.role !== selectedRole) {
+      logout();
+      setError(
+        selectedRole === "admin"
+          ? "This account is not an admin account."
+          : "This account is an admin account. Use Admin login instead.",
+      );
+      return;
+    }
+
+    const fallbackPath = selectedRole === "admin" ? "/admin" : "/app";
+    const requestedPath = location.state?.from?.pathname;
+    const destination =
+      selectedRole === "admin" && requestedPath?.startsWith("/admin")
+        ? requestedPath
+        : fallbackPath;
+
+    navigate(destination, { replace: true });
   }
 
   return (
@@ -34,6 +53,27 @@ export default function LoginPage() {
         <p>Log in to continue customer support conversations.</p>
         <ErrorAlert message={error} />
         <form onSubmit={submit}>
+          <fieldset className="role-selector">
+            <legend>Login as</legend>
+            <div>
+              <button
+                type="button"
+                className={selectedRole === "user" ? "active" : ""}
+                onClick={() => setSelectedRole("user")}
+                aria-pressed={selectedRole === "user"}
+              >
+                Customer
+              </button>
+              <button
+                type="button"
+                className={selectedRole === "admin" ? "active" : ""}
+                onClick={() => setSelectedRole("admin")}
+                aria-pressed={selectedRole === "admin"}
+              >
+                Admin
+              </button>
+            </div>
+          </fieldset>
           <FormInput
             label="Email"
             id="email"

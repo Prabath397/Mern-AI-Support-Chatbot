@@ -257,6 +257,46 @@ textarea:disabled {
   gap: 8px;
 }
 
+.role-selector {
+  display: grid;
+  gap: 8px;
+  border: 0;
+  margin: 0 0 14px;
+  padding: 0;
+}
+
+.role-selector legend {
+  font-weight: 700;
+  padding: 0;
+}
+
+.role-selector div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-alt);
+}
+
+.role-selector button {
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 800;
+  padding: 10px;
+}
+
+.role-selector button.active {
+  border-color: var(--primary);
+  background: var(--surface);
+  color: var(--primary);
+  box-shadow: 0 6px 18px rgba(17, 107, 122, 0.16);
+}
+
 label {
   font-weight: 700;
 }
