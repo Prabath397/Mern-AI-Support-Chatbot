@@ -3,6 +3,28 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const requiredInProduction = ["MONGO_URI", "JWT_SECRET", "CLIENT_URL"];
+const aiProvider = (process.env.AI_PROVIDER || "mock").trim().toLowerCase();
+const aiProviderDefaults = {
+  mock: {
+    baseUrl: "https://api.openai.com/v1",
+    model: "",
+  },
+  openai: {
+    baseUrl: "https://api.openai.com/v1",
+    model: "gpt-4.1-mini",
+  },
+  openrouter: {
+    baseUrl: "https://openrouter.ai/api/v1",
+    model: "",
+  },
+  deepseek: {
+    baseUrl: "https://api.deepseek.com",
+    model: "deepseek-v4-flash",
+  },
+};
+
+const selectedAiDefaults =
+  aiProviderDefaults[aiProvider] || aiProviderDefaults.openai;
 
 export const env = {
   port: process.env.PORT || 5000,
@@ -11,10 +33,13 @@ export const env = {
   jwtSecret: process.env.JWT_SECRET || "",
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || "7d",
   clientUrl: process.env.CLIENT_URL || "http://localhost:5173",
-  aiProvider: process.env.AI_PROVIDER || "mock",
-  aiBaseUrl: process.env.AI_BASE_URL || "https://api.openai.com/v1",
-  aiApiKey: process.env.AI_API_KEY || "",
-  aiModel: process.env.AI_MODEL || "",
+  aiProvider,
+  aiBaseUrl: process.env.AI_BASE_URL || selectedAiDefaults.baseUrl,
+  aiApiKey:
+    process.env.AI_API_KEY ||
+    (aiProvider === "deepseek" ? process.env.DEEPSEEK_API_KEY : "") ||
+    "",
+  aiModel: process.env.AI_MODEL || selectedAiDefaults.model,
   uploadDir: process.env.UPLOAD_DIR || "uploads",
   maxFileSizeMb: Number(process.env.MAX_FILE_SIZE_MB || 8),
   isProduction: process.env.NODE_ENV === "production",

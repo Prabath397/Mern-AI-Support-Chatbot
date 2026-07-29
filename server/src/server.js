@@ -10,7 +10,7 @@ async function start() {
     validateEnv();
     await connectDatabase();
     server = app.listen(env.port, () => {
-      console.info(`SupportSphere AI API listening on port ${env.port}`);
+      console.info(`Nexia AI API listening on port ${env.port}`);
     });
   } catch (error) {
     console.error("Failed to start server:", error.message);

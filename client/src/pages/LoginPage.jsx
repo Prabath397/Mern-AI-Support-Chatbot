@@ -50,7 +50,7 @@ export default function LoginPage() {
       <Navbar />
       <main className="auth-card">
         <h1>Welcome back</h1>
-        <p>Log in to continue customer support conversations.</p>
+        <p>Log in to continue your AI conversations.</p>
         <ErrorAlert message={error} />
         <form onSubmit={submit}>
           <fieldset className="role-selector">
@@ -62,7 +62,7 @@ export default function LoginPage() {
                 onClick={() => setSelectedRole("user")}
                 aria-pressed={selectedRole === "user"}
               >
-                Customer
+                User
               </button>
               <button
                 type="button"

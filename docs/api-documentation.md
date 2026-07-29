@@ -31,7 +31,7 @@ Core endpoints:
 - `DELETE /api/conversations/:id` deletes an owned conversation and messages.
 - `GET /api/conversations/:id/messages` returns ordered messages.
 - `POST /api/conversations/:id/messages` saves a user message.
-- `POST /api/chat` sends a user message and returns assistant response.
+- `POST /api/chat` sends a user question and returns an assistant response.
 - `GET /api/attachments/messages/:messageId/attachments/:attachmentId` downloads an owned message attachment.
 - `GET /api/admin/dashboard` returns counts and analytics.
 - `GET /api/admin/users` returns users.

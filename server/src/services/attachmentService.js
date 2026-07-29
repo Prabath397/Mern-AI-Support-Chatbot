@@ -1,12 +1,42 @@
 import fs from "fs/promises";
 import path from "path";
+import engData from "@tesseract.js-data/eng";
 import mammoth from "mammoth";
 import { PDFParse } from "pdf-parse";
+import Tesseract from "tesseract.js";
 
 const TEXT_LIMIT = 12000;
+const OCR_TEXT_LIMIT = 6000;
+const OCR_LANGUAGE = "eng";
+const { createWorker } = Tesseract;
 
 function truncate(text) {
   return (text || "").replace(/\s+/g, " ").trim().slice(0, TEXT_LIMIT);
+}
+
+function truncateOcr(text) {
+  return (text || "").replace(/\s+/g, " ").trim().slice(0, OCR_TEXT_LIMIT);
+}
+
+function isImage(file) {
+  return file.mimetype.startsWith("image/");
+}
+
+async function extractImageText(file) {
+  const worker = await createWorker(OCR_LANGUAGE, 1, {
+    cacheMethod: "none",
+    gzip: engData.gzip,
+    langPath: engData.langPath,
+  });
+
+  try {
+    const {
+      data: { text },
+    } = await worker.recognize(file.path);
+    return truncateOcr(text);
+  } finally {
+    await worker.terminate();
+  }
 }
 
 async function extractText(file) {
@@ -34,6 +64,15 @@ async function extractText(file) {
   ) {
     const result = await mammoth.extractRawText({ path: file.path });
     return truncate(result.value);
+  }
+
+  if (isImage(file)) {
+    try {
+      return await extractImageText(file);
+    } catch (error) {
+      console.warn(`OCR failed for ${file.originalname}: ${error.message}`);
+      return "";
+    }
   }
 
   return "";

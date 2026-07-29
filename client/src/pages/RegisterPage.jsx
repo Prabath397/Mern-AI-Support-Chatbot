@@ -30,7 +30,7 @@ export default function RegisterPage() {
       <Navbar />
       <main className="auth-card">
         <h1>Create your account</h1>
-        <p>Start using the SupportSphere AI workspace.</p>
+        <p>Start using your Nexia AI assistant.</p>
         <ErrorAlert message={error} />
         <form onSubmit={submit}>
           <FormInput

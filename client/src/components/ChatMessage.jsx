@@ -3,6 +3,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import hljs from "highlight.js";
 import "highlight.js/styles/github-dark.css";
+import { appName } from "../assets/brand.js";
 import { chatService } from "../services/chatService.js";
 
 function CodeBlock({ className, children, ...props }) {
@@ -48,7 +49,7 @@ export default function ChatMessage({ message }) {
   return (
     <article className={`chat-message ${message.role}`}>
       <div className="message-meta">
-        <strong>{isAssistant ? "SupportSphere AI" : "You"}</strong>
+        <strong>{isAssistant ? appName : "You"}</strong>
         {isAssistant ? (
           <button type="button" onClick={copy} className="copy-button">
             {copied ? "Copied" : "Copy"}

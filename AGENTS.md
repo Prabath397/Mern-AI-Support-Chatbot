@@ -1,4 +1,4 @@
-# SupportSphere AI Agent Notes
+# Nexia AI Agent Notes
 
 This project is a JavaScript-only MERN portfolio application.
 

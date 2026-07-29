@@ -19,7 +19,7 @@ function renderApp(initialEntries = ["/"]) {
   );
 }
 
-describe("SupportSphere client", () => {
+describe("Nexia AI client", () => {
   it("renders the login form", () => {
     renderApp(["/login"]);
     expect(
@@ -27,9 +27,7 @@ describe("SupportSphere client", () => {
     ).toBeInTheDocument();
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /customer/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /user/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /admin/i })).toBeInTheDocument();
   });
 
@@ -71,13 +69,10 @@ describe("SupportSphere client", () => {
   it("renders a chat empty state component", () => {
     vi.stubGlobal("localStorage", window.localStorage);
     render(
-      <EmptyState
-        title="Ask a support question"
-        message="Use a suggested prompt."
-      />,
+      <EmptyState title="Ask anything" message="Use a suggested prompt." />,
     );
     expect(
-      screen.getByRole("heading", { name: /ask a support question/i }),
+      screen.getByRole("heading", { name: /ask anything/i }),
     ).toBeInTheDocument();
   });
 });

@@ -10,10 +10,10 @@ function mockReply(content) {
     "",
     `You asked: "${content}"`,
     "",
-    "Here is a support-ready response:",
-    "- I understand the issue and would confirm the exact symptoms.",
-    "- I would check account, billing, or product context before taking action.",
-    "- I would provide a clear next step and escalation path if needed.",
+    "Here is a helpful general response:",
+    "- I can explain concepts, brainstorm ideas, draft text, summarize files, and help with code.",
+    "- For broad questions, I will give a clear answer and ask follow-up questions when more context would help.",
+    "- Configure a real AI provider key to replace this mock response with live model answers.",
   ].join("\n");
 }
 

@@ -11,9 +11,9 @@ import { chatService } from "../services/chatService.js";
 import { friendlyError } from "../utils/format.js";
 
 const suggestions = [
-  "Draft a response for a delayed delivery complaint.",
-  "Explain how to reset an account password.",
-  "Create a calm refund policy response.",
+  "Explain quantum computing in simple terms.",
+  "Help me plan a productive study schedule.",
+  "Draft a professional email for a meeting request.",
 ];
 
 export default function ChatPage() {
@@ -128,7 +128,7 @@ export default function ChatPage() {
             <h1>
               {activeId
                 ? conversations.find((item) => item._id === activeId)?.title
-                : "New support chat"}
+                : "New chat"}
             </h1>
           </div>
         </div>
@@ -145,8 +145,8 @@ export default function ChatPage() {
             ))
           ) : (
             <EmptyState
-              title="Ask a support question"
-              message="Use a suggested prompt or write your own customer scenario."
+              title="Ask anything"
+              message="Use a suggested prompt or write your own question."
             >
               <div className="suggestions">
                 {suggestions.map((item) => (

@@ -1,17 +1,17 @@
 :root {
   color-scheme: light;
-  --bg: #f7f8fb;
+  --bg: #fbf8ff;
   --surface: #ffffff;
-  --surface-alt: #eef3f8;
-  --text: #172033;
-  --muted: #607085;
-  --border: #d9e0ea;
-  --primary: #116b7a;
-  --primary-strong: #0c5662;
-  --accent: #b64b2f;
+  --surface-alt: #f1e9ff;
+  --text: #21172f;
+  --muted: #6f6182;
+  --border: #ddd0f2;
+  --primary: #8b5cf6;
+  --primary-strong: #6d28d9;
+  --accent: #14b8a6;
   --danger: #b42318;
-  --success: #16794c;
-  --shadow: 0 18px 50px rgba(15, 31, 51, 0.12);
+  --success: #15803d;
+  --shadow: 0 18px 50px rgba(83, 39, 146, 0.13);
   font-family:
     Inter,
     ui-sans-serif,
@@ -24,18 +24,18 @@
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #111722;
-  --surface: #182231;
-  --surface-alt: #223044;
-  --text: #eef4fb;
-  --muted: #a7b4c4;
-  --border: #34445a;
-  --primary: #38a6b9;
-  --primary-strong: #6fc7d5;
-  --accent: #e09b72;
+  --bg: #15101f;
+  --surface: #211832;
+  --surface-alt: #2d2144;
+  --text: #f7f2ff;
+  --muted: #c6b8da;
+  --border: #49365f;
+  --primary: #c4a7ff;
+  --primary-strong: #d8c8ff;
+  --accent: #5eead4;
   --danger: #ff8a80;
-  --success: #75d59f;
-  --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+  --success: #86efac;
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.38);
 }
 
 * {
@@ -96,13 +96,12 @@ textarea {
 }
 
 .brand-mark {
-  display: grid;
-  place-items: center;
   width: 34px;
   height: 34px;
   border-radius: 8px;
-  background: var(--primary);
-  color: white;
+  border: 1px solid color-mix(in srgb, var(--primary) 48%, transparent);
+  object-fit: cover;
+  box-shadow: 0 8px 18px rgba(139, 92, 246, 0.24);
 }
 
 .nav-actions {
@@ -162,6 +161,16 @@ textarea:disabled {
   max-width: 760px;
   font-size: clamp(3rem, 7vw, 6.4rem);
   line-height: 0.95;
+}
+
+.hero-logo {
+  display: block;
+  width: clamp(72px, 11vw, 112px);
+  height: clamp(72px, 11vw, 112px);
+  border: 1px solid color-mix(in srgb, var(--primary) 42%, transparent);
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 18px 38px rgba(139, 92, 246, 0.2);
 }
 
 .hero p {
@@ -302,7 +311,7 @@ textarea:disabled {
   border-color: var(--primary);
   background: var(--surface);
   color: var(--primary);
-  box-shadow: 0 6px 18px rgba(17, 107, 122, 0.16);
+  box-shadow: 0 6px 18px rgba(139, 92, 246, 0.18);
 }
 
 label {

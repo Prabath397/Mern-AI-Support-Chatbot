@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { appName, logoPath } from "../assets/brand.js";
 import Navbar from "../components/Navbar.jsx";
 
 export default function LandingPage() {
@@ -8,11 +9,12 @@ export default function LandingPage() {
       <main>
         <section className="hero">
           <div className="hero-content">
-            <p className="eyebrow">MERN customer support assistant</p>
-            <h1>SupportSphere AI</h1>
+            <p className="eyebrow">MERN AI chat assistant</p>
+            <img className="hero-logo" src={logoPath} alt="" />
+            <h1>{appName}</h1>
             <p>
-              A full-stack chatbot platform for support teams, with secure
-              authentication, conversation history, admin analytics, and a
+              A full-stack ChatGPT-style assistant with secure authentication,
+              conversation history, file attachments, admin analytics, and a
               backend-only AI provider layer.
             </p>
             <div className="hero-actions">
@@ -24,13 +26,13 @@ export default function LandingPage() {
               </Link>
             </div>
           </div>
-          <div className="hero-panel" aria-label="SupportSphere AI preview">
+          <div className="hero-panel" aria-label={`${appName} preview`}>
             <div className="preview-message customer">
-              My order status has not updated in 3 days.
+              Explain how APIs work in simple terms.
             </div>
             <div className="preview-message assistant">
-              I can help check likely causes, confirm the order ID, and suggest
-              the best escalation path.
+              An API is a structured way for apps to talk to each other. Think
+              of it as a menu of actions one app lets another app request.
             </div>
             <div className="metric-row">
               <span>JWT Auth</span>
@@ -41,7 +43,7 @@ export default function LandingPage() {
         </section>
         <section className="feature-grid">
           <article>
-            <h2>Agent-grade chat</h2>
+            <h2>General AI chat</h2>
             <p>
               Markdown, code blocks, copy actions, saved history, deterministic
               titles, and responsive layouts.

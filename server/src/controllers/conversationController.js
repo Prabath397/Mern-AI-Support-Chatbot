@@ -8,7 +8,7 @@ import { sendSuccess } from "../utils/responses.js";
 export const createConversation = asyncHandler(async (req, res) => {
   const conversation = await Conversation.create({
     user: req.user._id,
-    title: req.body.title || "New support chat",
+    title: req.body.title || "New chat",
   });
 
   sendSuccess(res, { conversation }, "Conversation created.", 201);

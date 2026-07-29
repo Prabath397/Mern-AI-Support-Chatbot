@@ -26,7 +26,7 @@ export default function ChatInput({ disabled, onSend }) {
         value={content}
         disabled={disabled}
         onChange={(event) => setContent(event.target.value)}
-        placeholder="Describe the customer's issue..."
+        placeholder="Ask anything..."
         rows={3}
       />
       <div className="attachment-field">

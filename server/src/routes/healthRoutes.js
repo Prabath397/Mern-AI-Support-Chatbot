@@ -8,7 +8,7 @@ healthRouter.get("/", (_req, res) => {
     res,
     {
       status: "ok",
-      service: "SupportSphere AI API",
+      service: "Nexia AI API",
       timestamp: new Date().toISOString(),
     },
     "API healthy.",

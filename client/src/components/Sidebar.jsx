@@ -31,10 +31,7 @@ export default function Sidebar({
           ))}
         </div>
       ) : (
-        <EmptyState
-          title="No chats yet"
-          message="Start a new support conversation."
-        />
+        <EmptyState title="No chats yet" message="Start a new conversation." />
       )}
     </aside>
   );

@@ -12,8 +12,9 @@ services:
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
       CLIENT_URL: ${CLIENT_URL:-http://localhost:5173}
       AI_PROVIDER: ${AI_PROVIDER:-mock}
-      AI_BASE_URL: ${AI_BASE_URL:-https://api.openai.com/v1}
+      AI_BASE_URL: ${AI_BASE_URL:-}
       AI_API_KEY: ${AI_API_KEY:-}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
       AI_MODEL: ${AI_MODEL:-}
 
   client:

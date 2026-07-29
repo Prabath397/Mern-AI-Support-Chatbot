@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 const ThemeContext = createContext(null);
-const THEME_KEY = "supportsphere_theme";
+const THEME_KEY = "nexia_theme";
 
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(

@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { api, attachAuthToken } from "../api/http.js";
 
 const AuthContext = createContext(null);
-const TOKEN_KEY = "supportsphere_token";
+const TOKEN_KEY = "nexia_token";
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);

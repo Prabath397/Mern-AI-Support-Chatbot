@@ -34,7 +34,7 @@ Authentication proves who the user is. Authorization checks what that user is al
 
 ## AI Service Abstraction
 
-The chat controller calls `aiService`. That service chooses mock mode when no backend AI key is available, or an OpenAI-compatible provider when configured. React never sees the AI key.
+The chat controller calls `aiService`. That service chooses mock mode when no backend AI key is available, or an OpenAI-compatible provider when configured. The default system prompt is general-purpose, and admins can change it from the settings page. DeepSeek is supported through a provider preset that supplies its default base URL and model. React never sees the AI key.
 
 ## Error Handling
 

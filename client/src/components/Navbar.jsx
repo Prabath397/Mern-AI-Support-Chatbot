@@ -1,4 +1,5 @@
 import { Link, NavLink } from "react-router-dom";
+import { appName, logoPath } from "../assets/brand.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import ThemeToggle from "./ThemeToggle.jsx";
 
@@ -8,8 +9,8 @@ export default function Navbar() {
   return (
     <header className="navbar">
       <Link className="brand" to="/">
-        <span className="brand-mark">S</span>
-        <span>SupportSphere AI</span>
+        <img className="brand-mark" src={logoPath} alt="" />
+        <span>{appName}</span>
       </Link>
       <nav className="nav-actions" aria-label="Main navigation">
         <ThemeToggle />

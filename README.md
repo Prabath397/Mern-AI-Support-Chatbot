@@ -1,6 +1,6 @@
-# SupportSphere AI
+# Nexia AI
 
-SupportSphere AI is a portfolio-quality MERN customer support chatbot. It demonstrates MongoDB, Express 5, React, Node.js, JWT authentication, admin authorization, conversation history, markdown chat responses, Docker preparation, CI, and deployment-ready environment configuration.
+Nexia AI is a portfolio-quality MERN ChatGPT-style AI assistant. It demonstrates MongoDB, Express 5, React, Node.js, JWT authentication, admin authorization, conversation history, markdown chat responses, Docker preparation, CI, and deployment-ready environment configuration.
 
 ## MERN Technologies
 
@@ -12,13 +12,13 @@ SupportSphere AI is a portfolio-quality MERN customer support chatbot. It demons
 ## Features
 
 - Register, log in, log out, retrieve and update profile
-- Role-aware customer/admin login with correct dashboard redirection
+- Role-aware user/admin login with correct dashboard redirection
 - JWT bearer authentication and admin-only routes
 - Create, list, rename, delete, and load conversations
 - Save and retrieve ordered message history
-- Chat endpoint with backend-only AI provider abstraction and mock fallback
+- General-purpose chat endpoint with backend-only AI provider abstraction and mock fallback
 - TXT, Markdown, CSV, JSON, PDF, DOCX, and image attachments on chat messages
-- Text extraction from document attachments so the AI can answer with uploaded context
+- Text extraction from document attachments and local OCR for images so the AI can answer with uploaded context
 - Markdown and code block rendering with copy actions
 - Light/dark mode, loading, error, and empty states
 - Admin dashboard with totals, recent users, user status controls, and system instructions
@@ -27,15 +27,15 @@ SupportSphere AI is a portfolio-quality MERN customer support chatbot. It demons
 
 ### Public Pages
 
-| Home Page                                               | Login Page                                                 | Register Page                                                    |
-| ------------------------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------- |
-| ![SupportSphere AI home page](screenshots/HomePage.png) | ![SupportSphere AI login page](screenshots/Login_Page.png) | ![SupportSphere AI register page](screenshots/Register_Page.png) |
+| Home Page                                       | Login Page                                         | Register Page                                            |
+| ----------------------------------------------- | -------------------------------------------------- | -------------------------------------------------------- |
+| ![Nexia AI home page](screenshots/HomePage.png) | ![Nexia AI login page](screenshots/Login_Page.png) | ![Nexia AI register page](screenshots/Register_Page.png) |
 
-### Customer Experience
+### User Experience
 
-| Customer Chat                                             | Customer Profile                                           |
-| --------------------------------------------------------- | ---------------------------------------------------------- |
-| ![Customer chat page](screenshots/Customer_Chat_Page.png) | ![Customer profile page](screenshots/Customer_Profile.png) |
+| User Chat                                             | User Profile                                           |
+| ----------------------------------------------------- | ------------------------------------------------------ |
+| ![User chat page](screenshots/Customer_Chat_Page.png) | ![User profile page](screenshots/Customer_Profile.png) |
 
 ### Admin Experience
 
@@ -49,12 +49,12 @@ SupportSphere AI is a portfolio-quality MERN customer support chatbot. It demons
 
 ## Architecture
 
-The client talks to the Express API through `client/src/api/http.js`. The API validates requests, authenticates JWTs, checks ownership or admin authorization, stores data in MongoDB Atlas through Mongoose, and calls `server/src/services/aiService.js` for assistant responses. If no AI key is configured, the mock provider keeps the application runnable.
+The client talks to the Express API through `client/src/api/http.js`. The API validates requests, authenticates JWTs, checks ownership or admin authorization, stores data in MongoDB Atlas through Mongoose, and calls `server/src/services/aiService.js` for general assistant responses. If no AI key is configured, the mock provider keeps the application runnable.
 
 ## Folder Structure
 
 ```text
-SupportSphere-AI/
+Nexia-AI/
 ├── client/
 ├── server/
 ├── docs/
@@ -91,17 +91,28 @@ Create or update `server/.env`. Never commit this file.
 ```env
 PORT=5000
 NODE_ENV=development
-MONGO_URI=mongodb+srv://USERNAME:PASSWORD@cluster0.example.mongodb.net/supportsphere_ai?retryWrites=true&w=majority&appName=Cluster0
+MONGO_URI=mongodb+srv://USERNAME:PASSWORD@cluster0.example.mongodb.net/nexia_ai?retryWrites=true&w=majority&appName=Cluster0
 JWT_SECRET=replace_with_a_long_random_secret_value
 JWT_EXPIRES_IN=7d
 CLIENT_URL=http://localhost:5173
 AI_PROVIDER=mock
-AI_BASE_URL=https://api.openai.com/v1
+AI_BASE_URL=
 AI_API_KEY=
+DEEPSEEK_API_KEY=
 AI_MODEL=
 UPLOAD_DIR=uploads
 MAX_FILE_SIZE_MB=8
 ```
+
+For DeepSeek, create an API key in the DeepSeek Platform, make sure the account has available balance if required, then use this AI section:
+
+```env
+AI_PROVIDER=deepseek
+AI_API_KEY=your_deepseek_key
+AI_MODEL=deepseek-v4-flash
+```
+
+`DEEPSEEK_API_KEY=your_deepseek_key` also works if you prefer a provider-specific variable. When `AI_PROVIDER=deepseek`, leave `AI_BASE_URL` blank or set it to `https://api.deepseek.com`. Keep the key only in backend environment variables; never expose it in the React client.
 
 For OpenRouter/free models, use this AI section instead:
 
@@ -111,6 +122,17 @@ AI_BASE_URL=https://openrouter.ai/api/v1
 AI_API_KEY=your_openrouter_key
 AI_MODEL=inclusionai/ling-3.0-flash:free
 ```
+
+For `openai/gpt-oss-120b` on OpenRouter, use:
+
+```env
+AI_PROVIDER=openrouter
+AI_BASE_URL=https://openrouter.ai/api/v1
+AI_API_KEY=your_openrouter_key
+AI_MODEL=openai/gpt-oss-120b
+```
+
+`openai/gpt-oss-120b` is a text-only model. Image uploads are handled by free local OCR with Tesseract.js first, then the extracted text is sent to the model as chat context.
 
 The React client uses `client/.env.example`:
 
@@ -125,7 +147,7 @@ There are no hardcoded admin credentials in the source code. This is intentional
 For local development, an admin account can use:
 
 ```text
-Email: admin@supportsphere.local
+Email: admin@nexia.local
 Password: set locally by the developer
 ```
 
@@ -140,7 +162,7 @@ To make any registered user an admin, update that user in MongoDB Atlas:
 To reset the local admin password, run this from `server/` and replace `NewStrongPassword123!`:
 
 ```powershell
-node -e "import('dotenv').then(async ({config})=>{config(); const mongoose=(await import('mongoose')).default; const bcrypt=(await import('bcryptjs')).default; await mongoose.connect(process.env.MONGO_URI); const hash=await bcrypt.hash('NewStrongPassword123!',12); await mongoose.connection.db.collection('users').updateOne({email:'admin@supportsphere.local'},{`$set:{password:hash,updatedAt:new Date()}}); await mongoose.disconnect(); console.log('Admin password updated');})"
+node -e "import('dotenv').then(async ({config})=>{config(); const mongoose=(await import('mongoose')).default; const bcrypt=(await import('bcryptjs')).default; await mongoose.connect(process.env.MONGO_URI); const hash=await bcrypt.hash('NewStrongPassword123!',12); await mongoose.connection.db.collection('users').updateOne({email:'admin@nexia.local'},{`$set:{password:hash,updatedAt:new Date()}}); await mongoose.disconnect(); console.log('Admin password updated');})"
 ```
 
 Do not place the real admin password in this README or any committed file.
@@ -150,14 +172,14 @@ Do not place the real admin password in this README or any committed file.
 Run the backend in terminal 1:
 
 ```powershell
-cd C:\Users\Prabath\OneDrive\Desktop\SupportSphere-AI\server
+cd server
 npm run dev
 ```
 
 Run the frontend in terminal 2:
 
 ```powershell
-cd C:\Users\Prabath\OneDrive\Desktop\SupportSphere-AI\client
+cd client
 npm run dev
 ```
 
@@ -255,20 +277,20 @@ npm test
 npm run build
 ```
 
-Create an empty GitHub repository named `SupportSphere-AI`, then run these commands in Git Bash from the project root:
+Create an empty GitHub repository named `Nexia-AI`, then run these commands in Git Bash from the project root:
 
 ```bash
-cd /c/Users/Prabath/OneDrive/Desktop/SupportSphere-AI
+cd /c/Users/Prabath/OneDrive/Desktop/Nexia-AI
 git status
 git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/SupportSphere-AI.git
+git remote add origin https://github.com/YOUR_USERNAME/Nexia-AI.git
 git push -u origin main
 ```
 
 If `origin` already exists, use:
 
 ```bash
-git remote set-url origin https://github.com/YOUR_USERNAME/SupportSphere-AI.git
+git remote set-url origin https://github.com/YOUR_USERNAME/Nexia-AI.git
 git push -u origin main
 ```
 
@@ -280,6 +302,7 @@ Replace `YOUR_USERNAME` with your GitHub username. Do not push `.env`, API keys,
 - Deploy `client/` to Vercel or Netlify.
 - Set `VITE_API_BASE_URL` to the deployed backend `/api` URL.
 - Set backend `MONGO_URI`, `JWT_SECRET`, `CLIENT_URL`, and optional AI variables in the host dashboard.
+- For DeepSeek, set `AI_PROVIDER=deepseek` plus `AI_API_KEY` or `DEEPSEEK_API_KEY`.
 
 ## Security Notes
 
