@@ -33,9 +33,9 @@ Nexia AI is a portfolio-quality MERN ChatGPT-style AI assistant. It demonstrates
 
 ### User Experience
 
-| User Chat                                             | User Profile                                           |
-| ----------------------------------------------------- | ------------------------------------------------------ |
-| ![User chat page](screenshots/Customer_Chat_Page.png) | ![User profile page](screenshots/Customer_Profile.png) |
+| User Chat                                         | User Profile                                       |
+| ------------------------------------------------- | -------------------------------------------------- |
+| ![User chat page](screenshots/User_Chat_Page.png) | ![User profile page](screenshots/User_Profile.png) |
 
 ### Admin Experience
 
