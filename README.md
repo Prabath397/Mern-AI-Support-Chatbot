@@ -104,16 +104,6 @@ UPLOAD_DIR=uploads
 MAX_FILE_SIZE_MB=8
 ```
 
-For DeepSeek, create an API key in the DeepSeek Platform, make sure the account has available balance if required, then use this AI section:
-
-```env
-AI_PROVIDER=deepseek
-AI_API_KEY=your_deepseek_key
-AI_MODEL=deepseek-v4-flash
-```
-
-`DEEPSEEK_API_KEY=your_deepseek_key` also works if you prefer a provider-specific variable. When `AI_PROVIDER=deepseek`, leave `AI_BASE_URL` blank or set it to `https://api.deepseek.com`. Keep the key only in backend environment variables; never expose it in the React client.
-
 For OpenRouter/free models, use this AI section instead:
 
 ```env
@@ -257,44 +247,6 @@ docker compose up --build
 
 MongoDB is not started locally because MongoDB Atlas is used.
 
-## GitHub Publishing Guide
-
-Before pushing, confirm secrets and generated files are ignored:
-
-```bash
-git status
-git check-ignore -v server/.env
-git check-ignore -v server/node_modules
-git check-ignore -v client/node_modules
-git check-ignore -v client/dist
-```
-
-Run quality checks:
-
-```bash
-npm run lint
-npm test
-npm run build
-```
-
-Create an empty GitHub repository named `Nexia-AI`, then run these commands in Git Bash from the project root:
-
-```bash
-cd /c/Users/Prabath/OneDrive/Desktop/Nexia-AI
-git status
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/Nexia-AI.git
-git push -u origin main
-```
-
-If `origin` already exists, use:
-
-```bash
-git remote set-url origin https://github.com/YOUR_USERNAME/Nexia-AI.git
-git push -u origin main
-```
-
-Replace `YOUR_USERNAME` with your GitHub username. Do not push `.env`, API keys, MongoDB passwords, admin passwords, `node_modules`, `dist`, `uploads`, or logs.
 
 ## Deployment Overview
 
