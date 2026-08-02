@@ -32,7 +32,11 @@ export const env = {
   mongoUri: process.env.MONGO_URI || "",
   jwtSecret: process.env.JWT_SECRET || "",
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || "7d",
-  clientUrl: process.env.CLIENT_URL || "http://localhost:5173",
+  clientUrl:
+    process.env.CLIENT_URL ||
+    process.env.URL ||
+    process.env.DEPLOY_PRIME_URL ||
+    "http://localhost:5173",
   aiProvider,
   aiBaseUrl: process.env.AI_BASE_URL || selectedAiDefaults.baseUrl,
   aiApiKey:
@@ -40,7 +44,7 @@ export const env = {
     (aiProvider === "deepseek" ? process.env.DEEPSEEK_API_KEY : "") ||
     "",
   aiModel: process.env.AI_MODEL || selectedAiDefaults.model,
-  uploadDir: process.env.UPLOAD_DIR || "uploads",
+  uploadDir: process.env.UPLOAD_DIR || (process.env.NETLIFY ? "/tmp/nexia-ai-uploads" : "uploads"),
   maxFileSizeMb: Number(process.env.MAX_FILE_SIZE_MB || 8),
   isProduction: process.env.NODE_ENV === "production",
   isTest: process.env.NODE_ENV === "test",

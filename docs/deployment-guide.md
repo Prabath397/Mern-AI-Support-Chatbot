@@ -1,13 +1,24 @@
 # Deployment Guide
 
-## Backend
+## Netlify
 
-Deploy `server/` to Render or another Node host.
+This project is configured for a Netlify-only deployment. Netlify builds the Vite client and serves the Express API through `server/netlify/functions/api.js`.
+
+Connect the repository in Netlify and use the checked-in `netlify.toml` settings:
+
+- Build command: `npm ci --prefix server && npm ci --prefix client && npm run build --prefix client`
+- Publish directory: `client/dist`
+- Functions directory: `server/netlify/functions`
+
+The app redirects `/api/*` to the Netlify function, so the frontend can use the same-site `/api` base URL in production.
+
+## Environment Variables
+
+Set these in Netlify.
 
 Set:
 
 - `NODE_ENV=production`
-- `PORT`
 - `MONGO_URI`
 - `JWT_SECRET`
 - `JWT_EXPIRES_IN`
@@ -18,31 +29,13 @@ Set:
 - `DEEPSEEK_API_KEY`
 - `AI_MODEL`
 
-Start command:
+Use your deployed Netlify site URL for `CLIENT_URL`, for example:
 
-```bash
-npm start
+```env
+CLIENT_URL=https://your-site-name.netlify.app
 ```
 
-## Frontend
-
-Deploy `client/` to Vercel or Netlify.
-
-Set:
-
-- `VITE_API_BASE_URL=https://your-backend.example.com/api`
-
-Build command:
-
-```bash
-npm run build
-```
-
-Publish directory:
-
-```text
-dist
-```
+`VITE_API_BASE_URL` is optional on Netlify because the client defaults to `/api` in production. Set it only if you intentionally point the frontend at a different API URL.
 
 ## AI Provider
 
@@ -70,3 +63,5 @@ Keep this only in backend hosting environment variables.
 ## OCR
 
 Image OCR runs inside the backend with `tesseract.js` and the packaged English language data from `@tesseract.js-data/eng`. It does not require a paid OCR API. OCR extracts readable text from PNG, JPG, and WEBP uploads, then passes that text into the configured AI model.
+
+Netlify Functions use temporary local storage. Uploaded attachments can be processed during a request, but stored attachment downloads are not durable across function instances. Move attachment storage to a cloud bucket if permanent downloads are required.

@@ -250,11 +250,15 @@ MongoDB is not started locally because MongoDB Atlas is used.
 
 ## Deployment Overview
 
-- Deploy `server/` to Render or another Node-compatible host.
-- Deploy `client/` to Vercel or Netlify.
-- Set `VITE_API_BASE_URL` to the deployed backend `/api` URL.
-- Set backend `MONGO_URI`, `JWT_SECRET`, `CLIENT_URL`, and optional AI variables in the host dashboard.
+This project is configured for Netlify-only deployment.
+
+- Netlify builds the Vite client from `client/`.
+- Netlify serves the Express API through `server/netlify/functions/api.js`.
+- `/api/*` redirects to the Netlify function, so `VITE_API_BASE_URL` is optional in production.
+- Set `NODE_ENV=production`, `MONGO_URI`, `JWT_SECRET`, `CLIENT_URL`, and optional AI variables in Netlify environment variables.
 - For DeepSeek, set `AI_PROVIDER=deepseek` plus `AI_API_KEY` or `DEEPSEEK_API_KEY`.
+
+Netlify Functions use temporary local storage. Attachment text extraction works during upload requests, but stored attachment downloads are not durable unless attachment storage is moved to a cloud bucket.
 
 ## Security Notes
 
