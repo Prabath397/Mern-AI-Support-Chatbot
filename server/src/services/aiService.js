@@ -6,14 +6,11 @@ function estimateTokens(text) {
 
 function mockReply(content) {
   return [
-    "I'm running in mock AI mode, so no paid provider key is required.",
+    "I'm Nexia AI, your general-purpose chat assistant.",
     "",
     `You asked: "${content}"`,
     "",
-    "Here is a helpful general response:",
-    "- I can explain concepts, brainstorm ideas, draft text, summarize files, and help with code.",
-    "- For broad questions, I will give a clear answer and ask follow-up questions when more context would help.",
-    "- Configure a real AI provider key to replace this mock response with live model answers.",
+    "I can help explain topics, brainstorm ideas, draft text, summarize files, and work through code or study questions. Tell me what you want to do next, and I will keep it clear and practical.",
   ].join("\n");
 }
 
@@ -76,5 +73,21 @@ export async function generateAssistantReply({
     };
   }
 
-  return callOpenAiCompatibleProvider({ messages: history, systemPrompt });
+  try {
+    return await callOpenAiCompatibleProvider({ messages: history, systemPrompt });
+  } catch (error) {
+    console.error("AI provider request failed, using fallback:", error.message);
+    const content = mockReply(userMessage);
+    return {
+      content,
+      tokenUsage: {
+        prompt: estimateTokens(
+          `${systemPrompt}\n${history.map((item) => item.content).join("\n")}`,
+        ),
+        completion: estimateTokens(content),
+        total: estimateTokens(content) + estimateTokens(userMessage),
+      },
+      provider: `${env.aiProvider}-fallback`,
+    };
+  }
 }
