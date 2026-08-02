@@ -4,6 +4,7 @@ const MATH_FORMATTING_INSTRUCTIONS =
   "When writing mathematics, equations, formulas, or symbols, use LaTeX inside Markdown math delimiters. Use `$...$` for inline math and `$$...$$` for display equations. Use clear multi-line display equations for systems, matrices, fractions, roots, summations, integrals, limits, and boxed final answers.";
 const WEB_SEARCH_INSTRUCTIONS =
   "You have access to live web search. Use it for current events, recent information, prices, schedules, or anything that may have changed. Do not say you cannot browse when web search is available.";
+const AI_TIMEOUT_MS = 24000;
 
 function estimateTokens(text) {
   return Math.ceil((text || "").length / 4);
@@ -17,6 +18,23 @@ function mockReply(content) {
     "",
     "I can help explain topics, brainstorm ideas, draft text, summarize files, and work through code or study questions. Tell me what you want to do next, and I will keep it clear and practical.",
   ].join("\n");
+}
+
+function providerFallbackReply(content, error) {
+  const isTimeout =
+    error?.name === "TimeoutError" || /aborted|timeout/i.test(error?.message || "");
+
+  if (env.aiProvider === "openai" && env.aiWebSearch && isTimeout) {
+    return [
+      "I tried to search the web, but the live search took too long for this deployment.",
+      "",
+      `You asked: "${content}"`,
+      "",
+      "Please try the same question again in a new message, or ask for a narrower search such as one country, topic, or source type.",
+    ].join("\n");
+  }
+
+  return mockReply(content);
 }
 
 function buildTokenUsage(data, fallbackContent, userMessage) {
@@ -44,6 +62,7 @@ function responseOutputText(data) {
 
 async function callOpenAiResponsesProvider({ messages, systemPrompt, userMessage }) {
   const baseUrl = env.aiBaseUrl.replace(/\/$/, "");
+  const signal = AbortSignal.timeout(AI_TIMEOUT_MS);
   const response = await fetch(`${baseUrl}/responses`, {
     method: "POST",
     headers: {
@@ -53,10 +72,14 @@ async function callOpenAiResponsesProvider({ messages, systemPrompt, userMessage
     body: JSON.stringify({
       model: env.aiModel || "gpt-5",
       instructions: `${systemPrompt}\n\n${MATH_FORMATTING_INSTRUCTIONS}\n\n${WEB_SEARCH_INSTRUCTIONS}`,
-      input: messages.map(({ role, content }) => ({ role, content })),
-      tools: [{ type: "web_search" }],
-      tool_choice: "auto",
+      input: messages.slice(-6).map(({ role, content }) => ({ role, content })),
+      tools: [{ type: "web_search", search_context_size: "low" }],
+      tool_choice: "required",
+      max_output_tokens: 700,
+      truncation: "auto",
+      store: false,
     }),
+    signal,
   });
 
   if (!response.ok) {
@@ -150,7 +173,7 @@ export async function generateAssistantReply({
     });
   } catch (error) {
     console.error("AI provider request failed, using fallback:", error.message);
-    const content = mockReply(userMessage);
+    const content = providerFallbackReply(userMessage, error);
     return {
       content,
       tokenUsage: {
