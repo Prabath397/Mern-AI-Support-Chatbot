@@ -9,13 +9,12 @@ export default function LandingPage() {
       <main>
         <section className="hero">
           <div className="hero-content">
-            <p className="eyebrow">MERN AI chat assistant</p>
+            <p className="eyebrow">Your AI chat assistant</p>
             <img className="hero-logo" src={logoPath} alt="" />
             <h1>{appName}</h1>
             <p>
-              A full-stack ChatGPT-style assistant with secure authentication,
-              conversation history, file attachments, admin analytics, and a
-              backend-only AI provider layer.
+              Ask questions, brainstorm ideas, summarize files, save your chat
+              history, and get clear answers whenever you need them.
             </p>
             <div className="hero-actions">
               <Link className="button button-primary" to="/register">
@@ -28,39 +27,40 @@ export default function LandingPage() {
           </div>
           <div className="hero-panel" aria-label={`${appName} preview`}>
             <div className="preview-message customer">
-              Explain how APIs work in simple terms.
+              Help me write a study plan for this week.
             </div>
             <div className="preview-message assistant">
-              An API is a structured way for apps to talk to each other. Think
-              of it as a menu of actions one app lets another app request.
+              Absolutely. Tell me your subjects, deadlines, and the time you
+              have each day, and I will turn it into a simple plan you can
+              follow.
             </div>
             <div className="metric-row">
-              <span>JWT Auth</span>
-              <span>MongoDB Atlas</span>
-              <span>Mock AI Ready</span>
+              <span>Saved chats</span>
+              <span>File uploads</span>
+              <span>Admin settings</span>
             </div>
           </div>
         </section>
         <section className="feature-grid">
           <article>
-            <h2>General AI chat</h2>
+            <h2>Everyday AI chat</h2>
             <p>
-              Markdown, code blocks, copy actions, saved history, deterministic
-              titles, and responsive layouts.
+              Ask for explanations, ideas, summaries, drafts, code help, or
+              step-by-step guidance in one clean chat space.
             </p>
           </article>
           <article>
-            <h2>Secure API</h2>
+            <h2>Private workspace</h2>
             <p>
-              Express 5, Helmet, CORS, rate limits, validation, JWT auth, role
-              checks, and centralized errors.
+              Create your own account, keep conversations organized, and return
+              to previous chats whenever you need them.
             </p>
           </article>
           <article>
-            <h2>Admin controls</h2>
+            <h2>Helpful controls</h2>
             <p>
-              Usage counts, recent users, activation controls, and editable
-              chatbot system instructions.
+              Upload supported files, copy useful answers, switch themes, and
+              manage assistant settings from the dashboard.
             </p>
           </article>
         </section>
