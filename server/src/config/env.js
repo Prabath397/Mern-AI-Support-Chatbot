@@ -44,6 +44,7 @@ export const env = {
     (aiProvider === "deepseek" ? process.env.DEEPSEEK_API_KEY : "") ||
     "",
   aiModel: process.env.AI_MODEL || selectedAiDefaults.model,
+  aiWebSearch: process.env.AI_WEB_SEARCH === "true",
   uploadDir:
     process.env.UPLOAD_DIR ||
     (process.env.NETLIFY ? "/tmp/nexia-ai-uploads" : "uploads"),

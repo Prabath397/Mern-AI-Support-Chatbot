@@ -1,8 +1,11 @@
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
+import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
 import hljs from "highlight.js";
 import "highlight.js/styles/github-dark.css";
+import "katex/dist/katex.min.css";
 import { appName } from "../assets/brand.js";
 import { chatService } from "../services/chatService.js";
 
@@ -21,6 +24,18 @@ function CodeBlock({ className, children, ...props }) {
       {...props}
     />
   );
+}
+
+function normalizeMathMarkdown(content) {
+  return (content || "")
+    .replace(/\\\[((?:.|\n)*?)\\\]/g, (_match, math) => {
+      return `\n\n$$\n${math.trim()}\n$$\n\n`;
+    })
+    .replace(/\\\(((?:.|\n)*?)\\\)/g, (_match, math) => `$${math.trim()}$`)
+    .replace(
+      /(^|\n)\s*\[\s*([^\]\n]*(?:\\begin|\\frac|\\boxed|\\sqrt|\\sum|\\int|\\Longrightarrow|\\rightarrow)[\s\S]*?)\s*\](?=\n|$)/g,
+      (_match, prefix, math) => `${prefix}\n$$\n${math.trim()}\n$$\n`,
+    );
 }
 
 export default function ChatMessage({ message }) {
@@ -59,10 +74,11 @@ export default function ChatMessage({ message }) {
       <div className="markdown-body">
         {isAssistant ? (
           <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
+            remarkPlugins={[remarkGfm, remarkMath]}
+            rehypePlugins={[[rehypeKatex, { strict: false, throwOnError: false }]]}
             components={{ code: CodeBlock }}
           >
-            {message.content}
+            {normalizeMathMarkdown(message.content)}
           </ReactMarkdown>
         ) : (
           <p>{message.content}</p>

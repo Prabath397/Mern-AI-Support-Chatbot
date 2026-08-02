@@ -100,6 +100,7 @@ AI_BASE_URL=
 AI_API_KEY=
 DEEPSEEK_API_KEY=
 AI_MODEL=
+AI_WEB_SEARCH=false
 UPLOAD_DIR=uploads
 MAX_FILE_SIZE_MB=8
 ```
@@ -123,6 +124,16 @@ AI_MODEL=openai/gpt-oss-120b
 ```
 
 `openai/gpt-oss-120b` is a text-only model. Image uploads are handled by free local OCR with Tesseract.js first, then the extracted text is sent to the model as chat context.
+
+To let Nexia AI answer current-event questions with live web search, use OpenAI and enable web search on the backend:
+
+```env
+AI_PROVIDER=openai
+AI_BASE_URL=https://api.openai.com/v1
+AI_API_KEY=your_openai_api_key
+AI_MODEL=chat-latest
+AI_WEB_SEARCH=true
+```
 
 The React client uses `client/.env.example`:
 

@@ -28,6 +28,7 @@ Set:
 - `AI_API_KEY`
 - `DEEPSEEK_API_KEY`
 - `AI_MODEL`
+- `AI_WEB_SEARCH`
 
 Use your deployed Netlify site URL for `CLIENT_URL`, for example:
 
@@ -59,6 +60,20 @@ AI_MODEL=deepseek-v4-flash
 You can use `DEEPSEEK_API_KEY` instead of `AI_API_KEY` for DeepSeek. When `AI_PROVIDER=deepseek`, `AI_BASE_URL` defaults to `https://api.deepseek.com`.
 
 Keep this only in backend hosting environment variables.
+
+## Web Search
+
+To let Nexia AI answer current-event questions with live web results, set these Netlify environment variables:
+
+```env
+AI_PROVIDER=openai
+AI_BASE_URL=https://api.openai.com/v1
+AI_API_KEY=your_openai_api_key
+AI_MODEL=chat-latest
+AI_WEB_SEARCH=true
+```
+
+Web search is only used when `AI_PROVIDER=openai` and `AI_WEB_SEARCH=true`. Other providers continue to use the OpenAI-compatible chat completions path.
 
 ## OCR
 

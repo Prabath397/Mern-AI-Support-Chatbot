@@ -440,7 +440,18 @@ textarea {
 }
 
 .markdown-body {
+  overflow-x: auto;
   line-height: 1.7;
+}
+
+.markdown-body .katex {
+  font-size: 1.05em;
+}
+
+.markdown-body .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 8px 0;
 }
 
 .markdown-body pre {
