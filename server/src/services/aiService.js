@@ -2,6 +2,8 @@ import { env } from "../config/env.js";
 
 const MATH_FORMATTING_INSTRUCTIONS =
   "When writing mathematics, equations, formulas, or symbols, use LaTeX inside Markdown math delimiters. Use `$...$` for inline math and `$$...$$` for display equations. Use clear multi-line display equations for systems, matrices, fractions, roots, summations, integrals, limits, and boxed final answers.";
+const MEMORY_INSTRUCTIONS =
+  "Use the conversation history below as memory for this chat. Resolve short follow-up messages, corrections, dates, pronouns, and phrases like 'then', 'that', or 'what about it' by referring to earlier user messages in the same conversation. If a user appears to correct a typo or add missing detail, connect it to the previous question instead of treating it as a new unrelated request.";
 const WEB_SEARCH_INSTRUCTIONS =
   "You have access to live web search. Use it for current events, recent information, prices, schedules, or anything that may have changed. Do not say you cannot browse when web search is available.";
 const AI_TIMEOUT_MS = 24000;
@@ -84,6 +86,16 @@ function responseOutputText(data) {
     .trim();
 }
 
+function buildHistoryTranscript(messages) {
+  return messages
+    .slice(-20)
+    .map((message) => {
+      const speaker = message.role === "assistant" ? "Assistant" : "User";
+      return `${speaker}: ${message.content}`;
+    })
+    .join("\n");
+}
+
 async function callOpenAiResponsesProvider({ messages, systemPrompt, userMessage }) {
   const baseUrl = env.aiBaseUrl.replace(/\/$/, "");
   const signal = AbortSignal.timeout(AI_TIMEOUT_MS);
@@ -95,7 +107,7 @@ async function callOpenAiResponsesProvider({ messages, systemPrompt, userMessage
     },
     body: JSON.stringify({
       model: env.aiModel || "gpt-5",
-      instructions: `${systemPrompt}\n\n${MATH_FORMATTING_INSTRUCTIONS}\n\n${WEB_SEARCH_INSTRUCTIONS}`,
+      instructions: `${systemPrompt}\n\n${MEMORY_INSTRUCTIONS}\n\n${MATH_FORMATTING_INSTRUCTIONS}\n\n${WEB_SEARCH_INSTRUCTIONS}`,
       input: messages.slice(-6).map(({ role, content }) => ({ role, content })),
       tools: [{ type: "web_search", search_context_size: "low" }],
       tool_choice: "required",
@@ -125,6 +137,10 @@ async function callOpenAiResponsesProvider({ messages, systemPrompt, userMessage
 
 async function callOpenAiCompatibleProvider({ messages, systemPrompt }) {
   const baseUrl = env.aiBaseUrl.replace(/\/$/, "");
+  const latestUserMessage =
+    [...messages].reverse().find((message) => message.role === "user")
+      ?.content || "";
+  const transcript = buildHistoryTranscript(messages);
   const response = await fetch(`${baseUrl}/chat/completions`, {
     method: "POST",
     headers: {
@@ -136,9 +152,12 @@ async function callOpenAiCompatibleProvider({ messages, systemPrompt }) {
       messages: [
         {
           role: "system",
-          content: `${systemPrompt}\n\n${MATH_FORMATTING_INSTRUCTIONS}`,
+          content: `${systemPrompt}\n\n${MEMORY_INSTRUCTIONS}\n\n${MATH_FORMATTING_INSTRUCTIONS}`,
         },
-        ...messages.map(({ role, content }) => ({ role, content })),
+        {
+          role: "user",
+          content: `Conversation transcript:\n${transcript}\n\nAnswer the latest user message using the transcript as context.\nLatest user message: ${latestUserMessage}`,
+        },
       ],
       temperature: 0.3,
     }),

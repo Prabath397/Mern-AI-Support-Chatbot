@@ -35,7 +35,7 @@ export const sendChatMessage = asyncHandler(async (req, res) => {
     conversation: conversation._id,
   })
     .sort({ createdAt: 1 })
-    .limit(12);
+    .limit(30);
   const userMessage = await Message.create({
     conversation: conversation._id,
     role: "user",
