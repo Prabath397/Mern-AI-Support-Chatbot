@@ -9,7 +9,6 @@ import {
 import {
   createMessage,
   listMessages,
-  saveExternalReply,
 } from "../controllers/messageController.js";
 import { protect } from "../middleware/auth.js";
 import { validateRequest } from "../middleware/errorHandler.js";
@@ -17,7 +16,6 @@ import {
   conversationIdParam,
   createConversationValidator,
   createMessageValidator,
-  externalReplyValidator,
   updateConversationValidator,
 } from "../validators/conversationValidators.js";
 
@@ -31,12 +29,6 @@ conversationRouter.post(
   createConversation,
 );
 conversationRouter.get("/", listConversations);
-conversationRouter.post(
-  "/external-reply",
-  externalReplyValidator,
-  validateRequest,
-  saveExternalReply,
-);
 conversationRouter.get(
   "/:id",
   conversationIdParam,

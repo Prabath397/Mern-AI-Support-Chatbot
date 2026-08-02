@@ -7,7 +7,6 @@ const WEB_SEARCH_INSTRUCTIONS =
 const AI_TIMEOUT_MS = 24000;
 const SECRET_PATTERNS = [
   /sk-[A-Za-z0-9_-]+/g,
-  /shuttle-[A-Za-z0-9_-]+/g,
   /Bearer\s+[A-Za-z0-9._-]+/gi,
 ];
 

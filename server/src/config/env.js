@@ -17,10 +17,6 @@ const aiProviderDefaults = {
     baseUrl: "https://openrouter.ai/api/v1",
     model: "",
   },
-  shuttleai: {
-    baseUrl: "https://api.shuttleai.com/v1",
-    model: "openai/gpt-5.5",
-  },
   deepseek: {
     baseUrl: "https://api.deepseek.com",
     model: "deepseek-v4-flash",
@@ -45,7 +41,6 @@ export const env = {
   aiBaseUrl: process.env.AI_BASE_URL || selectedAiDefaults.baseUrl,
   aiApiKey:
     process.env.AI_API_KEY ||
-    (aiProvider === "shuttleai" ? process.env.SHUTTLEAI_API_KEY : "") ||
     (aiProvider === "deepseek" ? process.env.DEEPSEEK_API_KEY : "") ||
     "",
   aiModel: process.env.AI_MODEL || selectedAiDefaults.model,

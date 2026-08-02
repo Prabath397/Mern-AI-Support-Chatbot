@@ -1,7 +1,4 @@
 import { api } from "../api/http.js";
-import { generatePuterReply } from "./puterService.js";
-
-const usePuter = import.meta.env.VITE_AI_PROVIDER === "puter";
 
 export const chatService = {
   listConversations: () => api.get("/conversations"),
@@ -10,10 +7,6 @@ export const chatService = {
   renameConversation: (id, title) => api.put(`/conversations/${id}`, { title }),
   deleteConversation: (id) => api.delete(`/conversations/${id}`),
   sendMessage: ({ content, conversationId, files = [] }) => {
-    if (usePuter && !files.length) {
-      return chatService.sendPuterMessage({ content, conversationId });
-    }
-
     if (!files.length) {
       return api.post("/chat", { content, conversationId });
     }
@@ -31,17 +24,4 @@ export const chatService = {
     api.get(`/attachments/messages/${messageId}/attachments/${attachmentId}`, {
       responseType: "blob",
     }),
-  async sendPuterMessage({ content, conversationId }) {
-    const previous = conversationId
-      ? (await chatService.getMessages(conversationId)).data.data.messages
-      : [];
-    const reply = await generatePuterReply({ content, history: previous });
-
-    return api.post("/conversations/external-reply", {
-      conversationId,
-      userContent: content,
-      assistantContent: reply.content,
-      provider: reply.provider,
-    });
-  },
 };

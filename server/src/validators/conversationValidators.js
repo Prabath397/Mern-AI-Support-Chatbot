@@ -29,26 +29,6 @@ export const createMessageValidator = [
     .withMessage("Message content is required."),
 ];
 
-export const externalReplyValidator = [
-  body("conversationId")
-    .optional()
-    .isMongoId()
-    .withMessage("Invalid conversation id."),
-  body("userContent")
-    .trim()
-    .isLength({ min: 1, max: 20000 })
-    .withMessage("User message content is required."),
-  body("assistantContent")
-    .trim()
-    .isLength({ min: 1, max: 20000 })
-    .withMessage("Assistant message content is required."),
-  body("provider")
-    .optional()
-    .trim()
-    .isLength({ min: 1, max: 80 })
-    .withMessage("Provider must be 1-80 characters."),
-];
-
 export const chatValidator = [
   body("conversationId")
     .optional()
