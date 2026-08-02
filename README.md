@@ -146,10 +146,23 @@ AI_MODEL=openai/gpt-5.5
 AI_WEB_SEARCH=false
 ```
 
+For Puter.js, use these client-side Netlify environment variables instead of a backend AI key:
+
+```env
+VITE_AI_PROVIDER=puter
+VITE_PUTER_MODEL=gpt-5.5
+VITE_PUTER_WEB_SEARCH=true
+```
+
+Puter runs from the browser with Puter's user-pays model. Text chat responses are saved back to MongoDB through the Nexia AI API. File attachment chats continue to use the backend AI provider path.
+
 The React client uses `client/.env.example`:
 
 ```env
 VITE_API_BASE_URL=http://localhost:5000/api
+VITE_AI_PROVIDER=server
+VITE_PUTER_MODEL=gpt-5.5
+VITE_PUTER_WEB_SEARCH=false
 ```
 
 ## Admin Access

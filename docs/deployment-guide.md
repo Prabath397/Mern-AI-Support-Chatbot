@@ -39,6 +39,16 @@ CLIENT_URL=https://your-site-name.netlify.app
 
 `VITE_API_BASE_URL` is optional on Netlify because the client defaults to `/api` in production. Set it only if you intentionally point the frontend at a different API URL.
 
+To use Puter.js from the browser instead of a backend AI key, set:
+
+```env
+VITE_AI_PROVIDER=puter
+VITE_PUTER_MODEL=gpt-5.5
+VITE_PUTER_WEB_SEARCH=true
+```
+
+With Puter mode, normal text chat runs through Puter.js in the browser and saves the resulting conversation through the Nexia AI API. Attachment chats still use the backend AI provider path.
+
 ## AI Provider
 
 The default provider is `mock`. To connect a real OpenAI-compatible provider later, set:
