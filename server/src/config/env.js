@@ -44,7 +44,9 @@ export const env = {
     (aiProvider === "deepseek" ? process.env.DEEPSEEK_API_KEY : "") ||
     "",
   aiModel: process.env.AI_MODEL || selectedAiDefaults.model,
-  uploadDir: process.env.UPLOAD_DIR || (process.env.NETLIFY ? "/tmp/nexia-ai-uploads" : "uploads"),
+  uploadDir:
+    process.env.UPLOAD_DIR ||
+    (process.env.NETLIFY ? "/tmp/nexia-ai-uploads" : "uploads"),
   maxFileSizeMb: Number(process.env.MAX_FILE_SIZE_MB || 8),
   isProduction: process.env.NODE_ENV === "production",
   isTest: process.env.NODE_ENV === "test",

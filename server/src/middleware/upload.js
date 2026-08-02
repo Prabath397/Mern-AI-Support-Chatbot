@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import fs from "fs";
+import os from "os";
 import path from "path";
 import multer from "multer";
 import { env } from "../config/env.js";
@@ -17,7 +18,13 @@ const allowedMimeTypes = new Set([
   "image/webp",
 ]);
 
-const uploadPath = path.resolve(process.cwd(), env.uploadDir);
+const isServerless =
+  Boolean(process.env.NETLIFY) ||
+  Boolean(process.env.AWS_LAMBDA_FUNCTION_NAME) ||
+  Boolean(process.env.LAMBDA_TASK_ROOT);
+const uploadPath = isServerless
+  ? path.join(os.tmpdir(), "nexia-ai-uploads")
+  : path.resolve(process.cwd(), env.uploadDir);
 fs.mkdirSync(uploadPath, { recursive: true });
 
 const storage = multer.diskStorage({
