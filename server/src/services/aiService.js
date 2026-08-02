@@ -5,6 +5,11 @@ const MATH_FORMATTING_INSTRUCTIONS =
 const WEB_SEARCH_INSTRUCTIONS =
   "You have access to live web search. Use it for current events, recent information, prices, schedules, or anything that may have changed. Do not say you cannot browse when web search is available.";
 const AI_TIMEOUT_MS = 24000;
+const SECRET_PATTERNS = [
+  /sk-[A-Za-z0-9_-]+/g,
+  /shuttle-[A-Za-z0-9_-]+/g,
+  /Bearer\s+[A-Za-z0-9._-]+/gi,
+];
 
 function estimateTokens(text) {
   return Math.ceil((text || "").length / 4);
@@ -20,9 +25,17 @@ function mockReply(content) {
   ].join("\n");
 }
 
+function safeErrorMessage(error) {
+  return SECRET_PATTERNS.reduce(
+    (message, pattern) => message.replace(pattern, "[redacted]"),
+    error?.message || "Unknown provider error.",
+  ).slice(0, 500);
+}
+
 function providerFallbackReply(content, error) {
   const isTimeout =
-    error?.name === "TimeoutError" || /aborted|timeout/i.test(error?.message || "");
+    error?.name === "TimeoutError" ||
+    /aborted|timeout/i.test(error?.message || "");
 
   if (env.aiProvider === "openai" && env.aiWebSearch && isTimeout) {
     return [
@@ -31,6 +44,18 @@ function providerFallbackReply(content, error) {
       `You asked: "${content}"`,
       "",
       "Please try the same question again in a new message, or ask for a narrower search such as one country, topic, or source type.",
+    ].join("\n");
+  }
+
+  if (env.aiProvider !== "mock") {
+    return [
+      "Nexia AI is connected to an external AI provider, but that provider request failed.",
+      "",
+      `Provider: ${env.aiProvider}`,
+      `Model: ${env.aiModel || "not set"}`,
+      `Error: ${safeErrorMessage(error)}`,
+      "",
+      "Check your Netlify AI environment variables, API key, model name, account plan, and provider rate limits.",
     ].join("\n");
   }
 
