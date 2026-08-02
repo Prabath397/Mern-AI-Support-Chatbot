@@ -4,6 +4,11 @@ dotenv.config();
 
 const requiredInProduction = ["MONGO_URI", "JWT_SECRET", "CLIENT_URL"];
 const aiProvider = (process.env.AI_PROVIDER || "mock").trim().toLowerCase();
+function positiveNumber(value, fallback) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
 const aiProviderDefaults = {
   mock: {
     baseUrl: "https://api.openai.com/v1",
@@ -45,6 +50,12 @@ export const env = {
     "",
   aiModel: process.env.AI_MODEL || selectedAiDefaults.model,
   aiWebSearch: process.env.AI_WEB_SEARCH === "true",
+  aiWebSearchTimeoutMs: positiveNumber(
+    process.env.AI_WEB_SEARCH_TIMEOUT_MS,
+    10000,
+  ),
+  aiTextTimeoutMs: positiveNumber(process.env.AI_TEXT_TIMEOUT_MS, 8000),
+  aiMaxOutputTokens: positiveNumber(process.env.AI_MAX_OUTPUT_TOKENS, 650),
   uploadDir:
     process.env.UPLOAD_DIR ||
     (process.env.NETLIFY ? "/tmp/nexia-ai-uploads" : "uploads"),

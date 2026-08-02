@@ -29,6 +29,9 @@ Set:
 - `DEEPSEEK_API_KEY`
 - `AI_MODEL`
 - `AI_WEB_SEARCH`
+- `AI_WEB_SEARCH_TIMEOUT_MS`
+- `AI_TEXT_TIMEOUT_MS`
+- `AI_MAX_OUTPUT_TOKENS`
 
 Use your deployed Netlify site URL for `CLIENT_URL`, for example:
 
@@ -48,6 +51,9 @@ AI_BASE_URL=https://api.openai.com/v1
 AI_API_KEY=your_openai_api_key
 AI_MODEL=gpt-5
 AI_WEB_SEARCH=true
+AI_WEB_SEARCH_TIMEOUT_MS=10000
+AI_TEXT_TIMEOUT_MS=8000
+AI_MAX_OUTPUT_TOKENS=650
 ```
 
 For DeepSeek, set:
@@ -75,6 +81,14 @@ AI_WEB_SEARCH=true
 ```
 
 Web search is only used when `AI_PROVIDER=openai` and `AI_WEB_SEARCH=true`. Other providers continue to use the OpenAI-compatible chat completions path.
+
+Netlify Functions have a strict request runtime limit. Keep AI timeouts comfortably below that limit so difficult web-search questions can fall back gracefully instead of becoming `502` or `504` gateway errors for remote users. The defaults are:
+
+```env
+AI_WEB_SEARCH_TIMEOUT_MS=10000
+AI_TEXT_TIMEOUT_MS=8000
+AI_MAX_OUTPUT_TOKENS=650
+```
 
 ## OCR
 

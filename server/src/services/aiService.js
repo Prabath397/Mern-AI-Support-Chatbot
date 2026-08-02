@@ -6,11 +6,7 @@ const MEMORY_INSTRUCTIONS =
   "Use the conversation history below as memory for this chat. Resolve short follow-up messages, corrections, dates, pronouns, and phrases like 'then', 'that', or 'what about it' by referring to earlier user messages in the same conversation. If a user appears to correct a typo or add missing detail, connect it to the previous question instead of treating it as a new unrelated request.";
 const WEB_SEARCH_INSTRUCTIONS =
   "You have access to live web search. Use it for current events, recent information, prices, schedules, or anything that may have changed. Do not say you cannot browse when web search is available.";
-const AI_TIMEOUT_MS = 24000;
-const SECRET_PATTERNS = [
-  /sk-[A-Za-z0-9_-]+/g,
-  /Bearer\s+[A-Za-z0-9._-]+/gi,
-];
+const SECRET_PATTERNS = [/sk-[A-Za-z0-9_-]+/g, /Bearer\s+[A-Za-z0-9._-]+/gi];
 
 function estimateTokens(text) {
   return Math.ceil((text || "").length / 4);
@@ -34,11 +30,7 @@ function safeErrorMessage(error) {
 }
 
 function providerFallbackReply(content, error) {
-  const isTimeout =
-    error?.name === "TimeoutError" ||
-    /aborted|timeout/i.test(error?.message || "");
-
-  if (env.aiProvider === "openai" && env.aiWebSearch && isTimeout) {
+  if (env.aiProvider === "openai" && env.aiWebSearch && isTimeoutError(error)) {
     return [
       "I tried to search the web, but the live search took too long for this deployment.",
       "",
@@ -66,8 +58,7 @@ function providerFallbackReply(content, error) {
 function buildTokenUsage(data, fallbackContent, userMessage) {
   return {
     prompt: data.usage?.prompt_tokens || data.usage?.input_tokens || 0,
-    completion:
-      data.usage?.completion_tokens || data.usage?.output_tokens || 0,
+    completion: data.usage?.completion_tokens || data.usage?.output_tokens || 0,
     total:
       data.usage?.total_tokens ||
       data.usage?.total ||
@@ -96,9 +87,21 @@ function buildHistoryTranscript(messages) {
     .join("\n");
 }
 
-async function callOpenAiResponsesProvider({ messages, systemPrompt, userMessage }) {
+function isTimeoutError(error) {
+  return (
+    error?.name === "TimeoutError" ||
+    error?.name === "AbortError" ||
+    /aborted|timeout/i.test(error?.message || "")
+  );
+}
+
+async function callOpenAiResponsesProvider({
+  messages,
+  systemPrompt,
+  userMessage,
+}) {
   const baseUrl = env.aiBaseUrl.replace(/\/$/, "");
-  const signal = AbortSignal.timeout(AI_TIMEOUT_MS);
+  const signal = AbortSignal.timeout(env.aiWebSearchTimeoutMs);
   const response = await fetch(`${baseUrl}/responses`, {
     method: "POST",
     headers: {
@@ -110,8 +113,8 @@ async function callOpenAiResponsesProvider({ messages, systemPrompt, userMessage
       instructions: `${systemPrompt}\n\n${MEMORY_INSTRUCTIONS}\n\n${MATH_FORMATTING_INSTRUCTIONS}\n\n${WEB_SEARCH_INSTRUCTIONS}`,
       input: messages.slice(-6).map(({ role, content }) => ({ role, content })),
       tools: [{ type: "web_search", search_context_size: "low" }],
-      tool_choice: "required",
-      max_output_tokens: 700,
+      tool_choice: "auto",
+      max_output_tokens: env.aiMaxOutputTokens,
       truncation: "auto",
       store: false,
     }),
@@ -126,7 +129,8 @@ async function callOpenAiResponsesProvider({ messages, systemPrompt, userMessage
   }
 
   const data = await response.json();
-  const content = responseOutputText(data) || "I could not generate a response.";
+  const content =
+    responseOutputText(data) || "I could not generate a response.";
 
   return {
     content,
@@ -135,8 +139,51 @@ async function callOpenAiResponsesProvider({ messages, systemPrompt, userMessage
   };
 }
 
+async function callOpenAiResponsesTextProvider({
+  messages,
+  systemPrompt,
+  userMessage,
+}) {
+  const baseUrl = env.aiBaseUrl.replace(/\/$/, "");
+  const signal = AbortSignal.timeout(env.aiTextTimeoutMs);
+  const response = await fetch(`${baseUrl}/responses`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${env.aiApiKey}`,
+    },
+    body: JSON.stringify({
+      model: env.aiModel || "gpt-5",
+      instructions: `${systemPrompt}\n\n${MEMORY_INSTRUCTIONS}\n\n${MATH_FORMATTING_INSTRUCTIONS}`,
+      input: messages.slice(-6).map(({ role, content }) => ({ role, content })),
+      max_output_tokens: env.aiMaxOutputTokens,
+      truncation: "auto",
+      store: false,
+    }),
+    signal,
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `OpenAI Responses text request failed with ${response.status}: ${errorText.slice(0, 300)}`,
+    );
+  }
+
+  const data = await response.json();
+  const content =
+    responseOutputText(data) || "I could not generate a response.";
+
+  return {
+    content,
+    tokenUsage: buildTokenUsage(data, content, userMessage),
+    provider: `${env.aiProvider}-text-fallback`,
+  };
+}
+
 async function callOpenAiCompatibleProvider({ messages, systemPrompt }) {
   const baseUrl = env.aiBaseUrl.replace(/\/$/, "");
+  const signal = AbortSignal.timeout(env.aiTextTimeoutMs);
   const latestUserMessage =
     [...messages].reverse().find((message) => message.role === "user")
       ?.content || "";
@@ -160,7 +207,9 @@ async function callOpenAiCompatibleProvider({ messages, systemPrompt }) {
         },
       ],
       temperature: 0.3,
+      max_tokens: env.aiMaxOutputTokens,
     }),
+    signal,
   });
 
   if (!response.ok) {
@@ -203,11 +252,25 @@ export async function generateAssistantReply({
 
   try {
     if (env.aiProvider === "openai" && env.aiWebSearch) {
-      return await callOpenAiResponsesProvider({
-        messages: history,
-        systemPrompt,
-        userMessage,
-      });
+      try {
+        return await callOpenAiResponsesProvider({
+          messages: history,
+          systemPrompt,
+          userMessage,
+        });
+      } catch (webSearchError) {
+        if (!isTimeoutError(webSearchError)) throw webSearchError;
+
+        console.warn(
+          "OpenAI web search timed out, retrying without web search:",
+          webSearchError.message,
+        );
+        return await callOpenAiResponsesTextProvider({
+          messages: history,
+          systemPrompt: `${systemPrompt}\n\nLive web search was attempted but timed out. Answer from general knowledge and clearly say if current information may need checking.`,
+          userMessage,
+        });
+      }
     }
 
     return await callOpenAiCompatibleProvider({
