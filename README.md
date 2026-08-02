@@ -98,6 +98,7 @@ CLIENT_URL=http://localhost:5173
 AI_PROVIDER=mock
 AI_BASE_URL=
 AI_API_KEY=
+SHUTTLEAI_API_KEY=
 DEEPSEEK_API_KEY=
 AI_MODEL=
 AI_WEB_SEARCH=false
@@ -133,6 +134,16 @@ AI_BASE_URL=https://api.openai.com/v1
 AI_API_KEY=your_openai_api_key
 AI_MODEL=gpt-5
 AI_WEB_SEARCH=true
+```
+
+For ShuttleAI, use:
+
+```env
+AI_PROVIDER=shuttleai
+AI_BASE_URL=https://api.shuttleai.com/v1
+AI_API_KEY=your_shuttleai_key
+AI_MODEL=openai/gpt-5.5
+AI_WEB_SEARCH=false
 ```
 
 The React client uses `client/.env.example`:

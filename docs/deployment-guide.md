@@ -26,6 +26,7 @@ Set:
 - `AI_PROVIDER`
 - `AI_BASE_URL`
 - `AI_API_KEY`
+- `SHUTTLEAI_API_KEY`
 - `DEEPSEEK_API_KEY`
 - `AI_MODEL`
 - `AI_WEB_SEARCH`
@@ -58,6 +59,18 @@ AI_MODEL=deepseek-v4-flash
 ```
 
 You can use `DEEPSEEK_API_KEY` instead of `AI_API_KEY` for DeepSeek. When `AI_PROVIDER=deepseek`, `AI_BASE_URL` defaults to `https://api.deepseek.com`.
+
+For ShuttleAI, set:
+
+```env
+AI_PROVIDER=shuttleai
+AI_BASE_URL=https://api.shuttleai.com/v1
+AI_API_KEY=your_shuttleai_key
+AI_MODEL=openai/gpt-5.5
+AI_WEB_SEARCH=false
+```
+
+You can use `SHUTTLEAI_API_KEY` instead of `AI_API_KEY` for ShuttleAI. When `AI_PROVIDER=shuttleai`, `AI_BASE_URL` defaults to `https://api.shuttleai.com/v1`.
 
 Keep this only in backend hosting environment variables.
 
