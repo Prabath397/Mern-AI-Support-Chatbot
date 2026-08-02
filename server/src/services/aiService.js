@@ -2,6 +2,8 @@ import { env } from "../config/env.js";
 
 const MATH_FORMATTING_INSTRUCTIONS =
   "When writing mathematics, equations, formulas, or symbols, use LaTeX inside Markdown math delimiters. Use `$...$` for inline math and `$$...$$` for display equations. Use clear multi-line display equations for systems, matrices, fractions, roots, summations, integrals, limits, and boxed final answers.";
+const WEB_SEARCH_INSTRUCTIONS =
+  "You have access to live web search. Use it for current events, recent information, prices, schedules, or anything that may have changed. Do not say you cannot browse when web search is available.";
 
 function estimateTokens(text) {
   return Math.ceil((text || "").length / 4);
@@ -49,10 +51,11 @@ async function callOpenAiResponsesProvider({ messages, systemPrompt, userMessage
       Authorization: `Bearer ${env.aiApiKey}`,
     },
     body: JSON.stringify({
-      model: env.aiModel || "chat-latest",
-      instructions: `${systemPrompt}\n\n${MATH_FORMATTING_INSTRUCTIONS}`,
+      model: env.aiModel || "gpt-5",
+      instructions: `${systemPrompt}\n\n${MATH_FORMATTING_INSTRUCTIONS}\n\n${WEB_SEARCH_INSTRUCTIONS}`,
       input: messages.map(({ role, content }) => ({ role, content })),
       tools: [{ type: "web_search" }],
+      tool_choice: "auto",
     }),
   });
 

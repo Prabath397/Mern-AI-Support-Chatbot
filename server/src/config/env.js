@@ -11,7 +11,7 @@ const aiProviderDefaults = {
   },
   openai: {
     baseUrl: "https://api.openai.com/v1",
-    model: "gpt-4.1-mini",
+    model: "gpt-5",
   },
   openrouter: {
     baseUrl: "https://openrouter.ai/api/v1",

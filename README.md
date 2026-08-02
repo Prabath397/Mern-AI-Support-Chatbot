@@ -131,7 +131,7 @@ To let Nexia AI answer current-event questions with live web search, use OpenAI 
 AI_PROVIDER=openai
 AI_BASE_URL=https://api.openai.com/v1
 AI_API_KEY=your_openai_api_key
-AI_MODEL=chat-latest
+AI_MODEL=gpt-5
 AI_WEB_SEARCH=true
 ```
 
