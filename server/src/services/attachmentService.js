@@ -2,7 +2,6 @@ import fs from "fs/promises";
 import path from "path";
 import engData from "@tesseract.js-data/eng";
 import mammoth from "mammoth";
-import { PDFParse } from "pdf-parse";
 import Tesseract from "tesseract.js";
 
 const TEXT_LIMIT = 12000;
@@ -48,13 +47,22 @@ async function extractText(file) {
   }
 
   if (file.mimetype === "application/pdf") {
-    const buffer = await fs.readFile(file.path);
-    const parser = new PDFParse({ data: buffer });
+    let parser;
     try {
+      const { PDFParse } = await import("pdf-parse");
+      const buffer = await fs.readFile(file.path);
+      parser = new PDFParse({ data: buffer });
       const parsed = await parser.getText();
       return truncate(parsed.text);
+    } catch (error) {
+      console.warn(
+        `PDF text extraction failed for ${file.originalname}: ${error.message}`,
+      );
+      return "";
     } finally {
-      await parser.destroy();
+      if (parser) {
+        await parser.destroy();
+      }
     }
   }
 
