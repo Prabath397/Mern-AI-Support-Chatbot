@@ -11,5 +11,8 @@
     "lint": "npm run lint --prefix server && npm run lint --prefix client",
     "build": "npm run build --prefix client"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@google/genai": "^2.15.0"
+  }
 }

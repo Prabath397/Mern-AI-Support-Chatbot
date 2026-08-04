@@ -15,11 +15,16 @@ const conversationSchema = new mongoose.Schema(
       minlength: 1,
       maxlength: 120,
     },
+    pinned: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
   },
   { timestamps: true },
 );
 
-conversationSchema.index({ user: 1, updatedAt: -1 });
+conversationSchema.index({ user: 1, pinned: -1, updatedAt: -1 });
 
 conversationSchema.methods.toJSON = function toJSON() {
   const conversation = this.toObject();

@@ -4,19 +4,36 @@ import EmptyState from "./EmptyState.jsx";
 export default function Sidebar({
   conversations,
   activeId,
+  searchQuery,
   onNew,
+  onSearch,
   onSelect,
   onRename,
   onDelete,
+  onPin,
 }) {
   return (
     <aside className="sidebar" aria-label="Conversations">
       <div className="sidebar-header">
-        <h2>Conversations</h2>
+        <div>
+          <span className="section-kicker">Workspace</span>
+          <h2>Conversations</h2>
+        </div>
         <button type="button" className="button button-primary" onClick={onNew}>
-          New
+          + New
         </button>
       </div>
+      <label className="sr-only" htmlFor="conversation-search">
+        Search conversations
+      </label>
+      <input
+        id="conversation-search"
+        className="conversation-search"
+        type="search"
+        value={searchQuery}
+        onChange={(event) => onSearch(event.target.value)}
+        placeholder="Search chats"
+      />
       {conversations.length ? (
         <div className="conversation-list">
           {conversations.map((conversation) => (
@@ -27,11 +44,19 @@ export default function Sidebar({
               onSelect={() => onSelect(conversation._id)}
               onRename={onRename}
               onDelete={onDelete}
+              onPin={onPin}
             />
           ))}
         </div>
       ) : (
-        <EmptyState title="No chats yet" message="Start a new conversation." />
+        <EmptyState
+          title={searchQuery ? "No matches" : "No chats yet"}
+          message={
+            searchQuery
+              ? "Try another title or message keyword."
+              : "Start a new conversation."
+          }
+        />
       )}
     </aside>
   );

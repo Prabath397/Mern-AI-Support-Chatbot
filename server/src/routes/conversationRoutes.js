@@ -5,6 +5,7 @@ import {
   getConversation,
   listConversations,
   updateConversation,
+  updateConversationPin,
 } from "../controllers/conversationController.js";
 import {
   createMessage,
@@ -16,6 +17,7 @@ import {
   conversationIdParam,
   createConversationValidator,
   createMessageValidator,
+  updateConversationPinValidator,
   updateConversationValidator,
 } from "../validators/conversationValidators.js";
 
@@ -40,6 +42,12 @@ conversationRouter.put(
   updateConversationValidator,
   validateRequest,
   updateConversation,
+);
+conversationRouter.patch(
+  "/:id/pin",
+  updateConversationPinValidator,
+  validateRequest,
+  updateConversationPin,
 );
 conversationRouter.delete(
   "/:id",

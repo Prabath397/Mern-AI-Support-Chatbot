@@ -37,7 +37,6 @@ export default function LandingPage() {
             <div className="metric-row">
               <span>Saved chats</span>
               <span>File uploads</span>
-              <span>Admin settings</span>
             </div>
           </div>
         </section>

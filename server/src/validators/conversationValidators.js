@@ -21,6 +21,11 @@ export const updateConversationValidator = [
     .withMessage("Title must be 1-120 characters."),
 ];
 
+export const updateConversationPinValidator = [
+  param("id").isMongoId().withMessage("Invalid conversation id."),
+  body("pinned").isBoolean().withMessage("Pinned must be true or false."),
+];
+
 export const createMessageValidator = [
   param("id").isMongoId().withMessage("Invalid conversation id."),
   body("content")
@@ -39,6 +44,10 @@ export const chatValidator = [
     .trim()
     .isLength({ max: 20000 })
     .withMessage("Message content must be 20,000 characters or less."),
+];
+
+export const regenerateValidator = [
+  body("conversationId").isMongoId().withMessage("Invalid conversation id."),
 ];
 
 export function requireChatContent(req, _res, next) {

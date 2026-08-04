@@ -12,6 +12,13 @@ import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { sendSuccess } from "../utils/responses.js";
 
+function messageContentWithAttachmentContext(message, label) {
+  const currentAttachmentContext = attachmentContext(message.attachments || []);
+  return currentAttachmentContext
+    ? `${message.content}\n\n${label}:\n${currentAttachmentContext}`
+    : message.content;
+}
+
 export const sendChatMessage = asyncHandler(async (req, res) => {
   const { conversationId, content } = req.body;
   const attachments = await buildAttachmentMetadata(req.files || []);
@@ -49,17 +56,13 @@ export const sendChatMessage = asyncHandler(async (req, res) => {
     : savedContent;
 
   const historyForAi = [
-    ...previousMessages.map((message) => {
-      const previousAttachmentContext = attachmentContext(
-        message.attachments || [],
-      );
-      return {
-        role: message.role,
-        content: previousAttachmentContext
-          ? `${message.content}\n\nPrevious attachment context:\n${previousAttachmentContext}`
-          : message.content,
-      };
-    }),
+    ...previousMessages.map((message) => ({
+      role: message.role,
+      content: messageContentWithAttachmentContext(
+        message,
+        "Previous attachment context",
+      ),
+    })),
     { role: "user", content: augmentedUserContent },
   ];
 
@@ -101,5 +104,85 @@ export const sendChatMessage = asyncHandler(async (req, res) => {
     },
     "Assistant response generated.",
     201,
+  );
+});
+
+export const regenerateChatMessage = asyncHandler(async (req, res) => {
+  const { conversationId } = req.body;
+  const conversation = await findOwnedConversation(
+    req.user._id,
+    conversationId,
+  );
+  const existingMessages = await Message.find({
+    conversation: conversation._id,
+  }).sort({ createdAt: 1 });
+
+  if (!existingMessages.length) {
+    throw new ApiError(400, "This conversation has no messages to retry.");
+  }
+
+  const messagesForRetry = [...existingMessages];
+  const lastMessage = messagesForRetry.at(-1);
+
+  if (lastMessage?.role === "assistant") {
+    messagesForRetry.pop();
+    await lastMessage.deleteOne();
+  }
+
+  const latestUserMessage = [...messagesForRetry]
+    .reverse()
+    .find((message) => message.role === "user");
+
+  if (!latestUserMessage) {
+    throw new ApiError(400, "This conversation has no user message to retry.");
+  }
+
+  const historyForAi = messagesForRetry.slice(-30).map((message) => ({
+    role: message.role,
+    content: messageContentWithAttachmentContext(
+      message,
+      message === latestUserMessage
+        ? "Use the following uploaded attachment context when answering"
+        : "Previous attachment context",
+    ),
+  }));
+
+  let aiResult;
+  try {
+    const setting = await getSystemSetting();
+    aiResult = await generateAssistantReply({
+      userMessage: messageContentWithAttachmentContext(
+        latestUserMessage,
+        "Use the following uploaded attachment context when answering",
+      ),
+      history: historyForAi,
+      systemPrompt: setting.systemPrompt,
+    });
+  } catch (error) {
+    console.error("AI provider error:", error.message);
+    throw new ApiError(
+      502,
+      "The assistant is temporarily unavailable. Please try again.",
+    );
+  }
+
+  const assistantMessage = await Message.create({
+    conversation: conversation._id,
+    role: "assistant",
+    content: aiResult.content,
+    tokenUsage: aiResult.tokenUsage,
+  });
+
+  conversation.updatedAt = new Date();
+  await conversation.save();
+
+  sendSuccess(
+    res,
+    {
+      conversation,
+      messages: [assistantMessage],
+      provider: aiResult.provider,
+    },
+    "Assistant response regenerated.",
   );
 });

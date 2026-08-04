@@ -6,14 +6,31 @@ export default function ConversationItem({
   onSelect,
   onRename,
   onDelete,
+  onPin,
 }) {
   return (
-    <article className={`conversation-item ${active ? "active" : ""}`}>
+    <article
+      className={`conversation-item ${active ? "active" : ""} ${
+        conversation.pinned ? "pinned" : ""
+      }`}
+    >
       <button type="button" onClick={onSelect} className="conversation-main">
-        <strong>{conversation.title}</strong>
+        <strong>
+          {conversation.pinned ? "Pinned: " : ""}
+          {conversation.title}
+        </strong>
         <span>{formatDate(conversation.updatedAt)}</span>
       </button>
       <div className="conversation-actions">
+        <button
+          type="button"
+          onClick={() => onPin(conversation)}
+          aria-label={`${conversation.pinned ? "Unpin" : "Pin"} ${
+            conversation.title
+          }`}
+        >
+          {conversation.pinned ? "Unpin" : "Pin"}
+        </button>
         <button
           type="button"
           onClick={() => onRename(conversation)}

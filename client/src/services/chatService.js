@@ -1,14 +1,18 @@
 import { api } from "../api/http.js";
 
 export const chatService = {
-  listConversations: () => api.get("/conversations"),
+  listConversations: (query = "") =>
+    api.get("/conversations", { params: query ? { q: query } : {} }),
   createConversation: (title) => api.post("/conversations", { title }),
   getMessages: (id) => api.get(`/conversations/${id}/messages`),
   renameConversation: (id, title) => api.put(`/conversations/${id}`, { title }),
+  setPinned: (id, pinned) => api.patch(`/conversations/${id}/pin`, { pinned }),
   deleteConversation: (id) => api.delete(`/conversations/${id}`),
-  sendMessage: ({ content, conversationId, files = [] }) => {
+  regenerateMessage: ({ conversationId, signal }) =>
+    api.post("/chat/regenerate", { conversationId }, { signal }),
+  sendMessage: ({ content, conversationId, files = [], signal }) => {
     if (!files.length) {
-      return api.post("/chat", { content, conversationId });
+      return api.post("/chat", { content, conversationId }, { signal });
     }
 
     const formData = new FormData();
@@ -18,6 +22,7 @@ export const chatService = {
 
     return api.post("/chat", formData, {
       headers: { "Content-Type": "multipart/form-data" },
+      signal,
     });
   },
   downloadAttachment: (messageId, attachmentId) =>

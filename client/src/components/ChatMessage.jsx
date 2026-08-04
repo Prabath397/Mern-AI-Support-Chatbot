@@ -28,6 +28,7 @@ function CodeBlock({ className, children, ...props }) {
 
 function normalizeMathMarkdown(content) {
   return (content || "")
+    .replace(/<br\s*\/?>/gi, "\n")
     .replace(/\\\[((?:.|\n)*?)\\\]/g, (_match, math) => {
       return `\n\n$$\n${math.trim()}\n$$\n\n`;
     })
@@ -38,7 +39,12 @@ function normalizeMathMarkdown(content) {
     );
 }
 
-export default function ChatMessage({ message }) {
+export default function ChatMessage({
+  message,
+  canRegenerate = false,
+  onRegenerate,
+  regenerating = false,
+}) {
   const [copied, setCopied] = useState(false);
   const isAssistant = message.role === "assistant";
 
@@ -63,19 +69,36 @@ export default function ChatMessage({ message }) {
 
   return (
     <article className={`chat-message ${message.role}`}>
+      <div className="message-avatar" aria-hidden="true">
+        {isAssistant ? "N" : "Y"}
+      </div>
       <div className="message-meta">
         <strong>{isAssistant ? appName : "You"}</strong>
         {isAssistant ? (
-          <button type="button" onClick={copy} className="copy-button">
-            {copied ? "Copied" : "Copy"}
-          </button>
+          <div className="message-actions">
+            {canRegenerate ? (
+              <button
+                type="button"
+                onClick={onRegenerate}
+                className="copy-button"
+                disabled={regenerating}
+              >
+                {regenerating ? "Retrying" : "Regenerate"}
+              </button>
+            ) : null}
+            <button type="button" onClick={copy} className="copy-button">
+              {copied ? "Copied" : "Copy"}
+            </button>
+          </div>
         ) : null}
       </div>
       <div className="markdown-body">
         {isAssistant ? (
           <ReactMarkdown
             remarkPlugins={[remarkGfm, remarkMath]}
-            rehypePlugins={[[rehypeKatex, { strict: false, throwOnError: false }]]}
+            rehypePlugins={[
+              [rehypeKatex, { strict: false, throwOnError: false }],
+            ]}
             components={{ code: CodeBlock }}
           >
             {normalizeMathMarkdown(message.content)}

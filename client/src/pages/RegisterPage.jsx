@@ -6,6 +6,10 @@ import Navbar from "../components/Navbar.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useAsync } from "../hooks/useAsync.js";
 
+function destinationFor(user) {
+  return user.role === "admin" ? "/admin" : "/app";
+}
+
 export default function RegisterPage() {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const { register } = useAuth();
@@ -21,8 +25,8 @@ export default function RegisterPage() {
 
   async function submit(event) {
     event.preventDefault();
-    await run(() => register(form));
-    navigate("/app", { replace: true });
+    const signedInUser = await run(() => register(form));
+    navigate(destinationFor(signedInUser), { replace: true });
   }
 
   return (

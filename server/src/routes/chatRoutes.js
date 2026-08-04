@@ -1,11 +1,15 @@
 import { Router } from "express";
-import { sendChatMessage } from "../controllers/chatController.js";
+import {
+  regenerateChatMessage,
+  sendChatMessage,
+} from "../controllers/chatController.js";
 import { protect } from "../middleware/auth.js";
 import { validateRequest } from "../middleware/errorHandler.js";
 import { chatLimiter } from "../middleware/rateLimiters.js";
 import { chatUpload } from "../middleware/upload.js";
 import {
   chatValidator,
+  regenerateValidator,
   requireChatContent,
 } from "../validators/conversationValidators.js";
 
@@ -20,4 +24,13 @@ chatRouter.post(
   validateRequest,
   requireChatContent,
   sendChatMessage,
+);
+
+chatRouter.post(
+  "/regenerate",
+  protect,
+  chatLimiter,
+  regenerateValidator,
+  validateRequest,
+  regenerateChatMessage,
 );
