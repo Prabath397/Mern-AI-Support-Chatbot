@@ -48,7 +48,7 @@ function providerFallbackReply(content, error) {
       `Model: ${env.aiModel || "not set"}`,
       `Error: ${safeErrorMessage(error)}`,
       "",
-      "Check your Netlify AI environment variables, API key, model name, account plan, and provider rate limits.",
+      "Check your AI environment variables, API key, model name, account plan, provider rate limits, and request timeout settings.",
     ].join("\n");
   }
 
