@@ -57,6 +57,7 @@
 html {
   min-width: 320px;
   background: var(--bg);
+  font-size: 93.75%;
 }
 
 body {
@@ -122,7 +123,7 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  padding: 14px clamp(18px, 4vw, 52px);
+  padding: 12px clamp(16px, 3.6vw, 46px);
   border-bottom: 1px solid var(--border);
   background: color-mix(in srgb, var(--surface-solid) 76%, transparent);
   backdrop-filter: blur(22px) saturate(160%);
@@ -145,8 +146,8 @@ button {
 }
 
 .brand-mark {
-  width: 46px;
-  height: 46px;
+  width: 42px;
+  height: 42px;
   border: 1px solid color-mix(in srgb, var(--primary) 42%, transparent);
   border-radius: 14px;
   object-fit: cover;
@@ -179,7 +180,7 @@ button {
 .button,
 .icon-button,
 .copy-button {
-  min-height: 42px;
+  min-height: 40px;
   border: 1px solid var(--border);
   border-radius: 999px;
   background: var(--surface);
@@ -187,7 +188,7 @@ button {
   cursor: pointer;
   font-weight: 850;
   letter-spacing: 0;
-  padding: 11px 16px;
+  padding: 10px 15px;
   transition:
     transform 0.18s ease,
     box-shadow 0.18s ease,
@@ -232,8 +233,8 @@ textarea:disabled {
 
 .icon-button {
   display: inline-grid;
-  width: 42px;
-  min-width: 42px;
+  width: 40px;
+  min-width: 40px;
   padding: 0;
   place-items: center;
 }
@@ -260,9 +261,9 @@ textarea:disabled {
   display: grid;
   grid-template-columns: minmax(0, 1.02fr) minmax(340px, 0.98fr);
   align-items: center;
-  min-height: calc(100svh - 75px);
-  gap: clamp(32px, 6vw, 84px);
-  padding: clamp(42px, 7vw, 92px) clamp(20px, 6vw, 88px) 58px;
+  min-height: calc(100svh - 68px);
+  gap: clamp(28px, 5vw, 70px);
+  padding: clamp(34px, 6vw, 76px) clamp(18px, 5vw, 74px) 48px;
 }
 
 .hero-content {
@@ -272,16 +273,16 @@ textarea:disabled {
 
 .hero h1 {
   margin: 0;
-  max-width: 760px;
-  font-size: clamp(4rem, 10vw, 8.8rem);
+  max-width: 700px;
+  font-size: clamp(3.5rem, 8.6vw, 7.4rem);
   line-height: 0.86;
   text-wrap: balance;
 }
 
 .hero-logo {
   display: block;
-  width: clamp(104px, 16vw, 170px);
-  height: clamp(104px, 16vw, 170px);
+  width: clamp(96px, 14vw, 150px);
+  height: clamp(96px, 14vw, 150px);
   border: 1px solid color-mix(in srgb, var(--primary) 36%, transparent);
   border-radius: 22px;
   object-fit: cover;
@@ -361,7 +362,7 @@ textarea:disabled {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
-  padding: 0 clamp(20px, 6vw, 88px) 70px;
+  padding: 0 clamp(18px, 5vw, 74px) 58px;
 }
 
 .feature-grid article,
@@ -381,7 +382,7 @@ textarea:disabled {
 
 .feature-grid article,
 .stats-grid article {
-  padding: 24px;
+  padding: 20px;
 }
 
 .feature-grid h2,
@@ -397,8 +398,8 @@ textarea:disabled {
 .auth-card,
 .content-narrow {
   width: min(94vw, 510px);
-  margin: clamp(34px, 7vw, 80px) auto;
-  padding: clamp(24px, 4vw, 38px);
+  margin: clamp(28px, 6vw, 66px) auto;
+  padding: clamp(22px, 3.4vw, 32px);
 }
 
 .auth-card h1,
@@ -488,27 +489,28 @@ textarea:focus {
 
 .chat-layout {
   display: grid;
-  grid-template-columns: minmax(270px, 330px) minmax(0, 1fr);
+  grid-template-columns: minmax(250px, 310px) minmax(0, 1fr);
   height: 100%;
   min-height: 0;
   overflow: hidden;
-  padding: 18px;
+  padding: 14px;
 }
 
 .sidebar {
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr);
-  gap: 18px;
+  gap: 14px;
   min-height: 0;
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: 30px;
   background: color-mix(in srgb, var(--surface-solid) 76%, transparent);
   box-shadow: var(--shadow-soft);
-  padding: 18px;
+  padding: 16px;
 }
 
 .sidebar-header,
+.sidebar-header-actions,
 .chat-header,
 .message-meta,
 .conversation-actions {
@@ -520,6 +522,16 @@ textarea:focus {
 
 .sidebar-header {
   align-items: flex-start;
+}
+
+.sidebar-header-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.mobile-sidebar-toggle,
+.mobile-sidebar-close {
+  display: none;
 }
 
 .conversation-list {
@@ -619,7 +631,7 @@ textarea:focus {
 
 .chat-header h1 {
   margin-top: 4px;
-  font-size: clamp(1.4rem, 3vw, 2.35rem);
+  font-size: clamp(1.25rem, 2.5vw, 2.05rem);
 }
 
 .status-row {
@@ -632,7 +644,7 @@ textarea:focus {
   grid-area: messages;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   min-height: 0;
   overflow: auto;
   scroll-padding-bottom: 170px;
@@ -643,8 +655,8 @@ textarea:focus {
   position: relative;
   display: grid;
   gap: 10px;
-  width: min(920px, 100%);
-  padding: 18px 18px 18px 58px;
+  width: min(860px, 100%);
+  padding: 16px 16px 16px 54px;
 }
 
 .chat-message.user {
@@ -663,8 +675,8 @@ textarea:focus {
   top: 16px;
   left: 16px;
   display: grid;
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--accent), var(--primary));
   color: white;
@@ -730,14 +742,14 @@ textarea:focus {
   border-radius: 30px;
   background: color-mix(in srgb, var(--surface-solid) 82%, transparent);
   box-shadow: var(--shadow);
-  padding: 12px;
+  padding: 10px;
   backdrop-filter: blur(22px) saturate(160%);
 }
 
 .chat-input textarea {
-  height: 72px;
-  min-height: 72px;
-  max-height: 72px;
+  height: 64px;
+  min-height: 64px;
+  max-height: 64px;
   resize: none;
   border: 0;
   background: transparent;
@@ -1086,8 +1098,27 @@ tr:last-child td {
     padding: 10px;
   }
 
+  .mobile-sidebar-toggle {
+    display: inline-flex;
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 2px;
+  }
+
+  .mobile-sidebar-close {
+    display: inline-flex;
+  }
+
+  .sidebar:not(.mobile-open) {
+    display: none;
+  }
+
+  .sidebar.mobile-open {
+    max-height: min(58svh, 520px);
+  }
+
   .chat-panel {
-    height: calc(100svh - 170px);
+    height: calc(100svh - 220px);
     min-height: 480px;
   }
 

@@ -27,6 +27,7 @@ export default function ChatPage() {
   const [renameTarget, setRenameTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [newTitle, setNewTitle] = useState("");
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const messagesRef = useRef(null);
   const activeRequestRef = useRef(null);
 
@@ -96,11 +97,13 @@ export default function ChatPage() {
     setActiveId(id);
     const res = await chatService.getMessages(id);
     setMessages(res.data.data.messages);
+    setMobileSidebarOpen(false);
   }
 
   async function startNew() {
     setActiveId("");
     setMessages([]);
+    setMobileSidebarOpen(false);
   }
 
   async function send(content, files = []) {
@@ -255,16 +258,27 @@ export default function ChatPage() {
 
   return (
     <div className="chat-layout">
+      <button
+        type="button"
+        className="button button-secondary mobile-sidebar-toggle"
+        aria-controls="conversation-sidebar"
+        aria-expanded={mobileSidebarOpen}
+        onClick={() => setMobileSidebarOpen((open) => !open)}
+      >
+        {mobileSidebarOpen ? "Hide conversations" : "Show conversations"}
+      </button>
       <Sidebar
         conversations={conversations}
         activeId={activeId}
         searchQuery={searchQuery}
+        mobileOpen={mobileSidebarOpen}
         onNew={startNew}
         onSearch={setSearchQuery}
         onSelect={selectConversation}
         onRename={openRename}
         onDelete={setDeleteTarget}
         onPin={togglePin}
+        onClose={() => setMobileSidebarOpen(false)}
       />
       <section className="chat-panel" aria-label="Chat workspace">
         <div className="chat-header">

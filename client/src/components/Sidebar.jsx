@@ -5,23 +5,42 @@ export default function Sidebar({
   conversations,
   activeId,
   searchQuery,
+  mobileOpen = false,
   onNew,
   onSearch,
   onSelect,
   onRename,
   onDelete,
   onPin,
+  onClose,
 }) {
   return (
-    <aside className="sidebar" aria-label="Conversations">
+    <aside
+      id="conversation-sidebar"
+      className={`sidebar ${mobileOpen ? "mobile-open" : ""}`}
+      aria-label="Conversations"
+    >
       <div className="sidebar-header">
         <div>
           <span className="section-kicker">Workspace</span>
           <h2>Conversations</h2>
         </div>
-        <button type="button" className="button button-primary" onClick={onNew}>
-          + New
-        </button>
+        <div className="sidebar-header-actions">
+          <button
+            type="button"
+            className="button button-secondary mobile-sidebar-close"
+            onClick={onClose}
+          >
+            Hide
+          </button>
+          <button
+            type="button"
+            className="button button-primary"
+            onClick={onNew}
+          >
+            + New
+          </button>
+        </div>
       </div>
       <label className="sr-only" htmlFor="conversation-search">
         Search conversations
