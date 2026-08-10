@@ -22,6 +22,10 @@ const aiProviderDefaults = {
     baseUrl: "https://openrouter.ai/api/v1",
     model: "",
   },
+  groq: {
+    baseUrl: "https://api.groq.com/openai/v1",
+    model: "openai/gpt-oss-120b",
+  },
   deepseek: {
     baseUrl: "https://api.deepseek.com",
     model: "deepseek-v4-flash",
@@ -46,6 +50,7 @@ export const env = {
   aiBaseUrl: process.env.AI_BASE_URL || selectedAiDefaults.baseUrl,
   aiApiKey:
     process.env.AI_API_KEY ||
+    (aiProvider === "groq" ? process.env.GROQ_API_KEY : "") ||
     (aiProvider === "deepseek" ? process.env.DEEPSEEK_API_KEY : "") ||
     "",
   aiModel: process.env.AI_MODEL || selectedAiDefaults.model,

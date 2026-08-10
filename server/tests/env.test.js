@@ -6,6 +6,7 @@ async function loadEnv(overrides = {}) {
   vi.stubEnv("AI_PROVIDER", "");
   vi.stubEnv("AI_BASE_URL", "");
   vi.stubEnv("AI_API_KEY", "");
+  vi.stubEnv("GROQ_API_KEY", "");
   vi.stubEnv("DEEPSEEK_API_KEY", "");
   vi.stubEnv("AI_MODEL", "");
   vi.stubEnv("AI_WEB_SEARCH_TIMEOUT_MS", "");
@@ -24,6 +25,18 @@ afterEach(() => {
 });
 
 describe("AI provider environment defaults", () => {
+  it("uses Groq defaults when the Groq provider is selected", async () => {
+    const { env } = await loadEnv({
+      AI_PROVIDER: "groq",
+      GROQ_API_KEY: "groq-test-key",
+    });
+
+    expect(env.aiProvider).toBe("groq");
+    expect(env.aiBaseUrl).toBe("https://api.groq.com/openai/v1");
+    expect(env.aiApiKey).toBe("groq-test-key");
+    expect(env.aiModel).toBe("openai/gpt-oss-120b");
+  });
+
   it("uses DeepSeek defaults when the DeepSeek provider is selected", async () => {
     const { env } = await loadEnv({
       AI_PROVIDER: "deepseek",

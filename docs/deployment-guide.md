@@ -26,6 +26,7 @@ Set:
 - `AI_PROVIDER`
 - `AI_BASE_URL`
 - `AI_API_KEY`
+- `GROQ_API_KEY`
 - `DEEPSEEK_API_KEY`
 - `AI_MODEL`
 - `AI_WEB_SEARCH`
@@ -65,6 +66,16 @@ AI_MODEL=deepseek-v4-flash
 ```
 
 You can use `DEEPSEEK_API_KEY` instead of `AI_API_KEY` for DeepSeek. When `AI_PROVIDER=deepseek`, `AI_BASE_URL` defaults to `https://api.deepseek.com`.
+
+For Groq, set:
+
+```env
+AI_PROVIDER=groq
+GROQ_API_KEY=your_groq_key
+AI_MODEL=openai/gpt-oss-120b
+```
+
+You can use `AI_API_KEY` instead of `GROQ_API_KEY` for Groq. When `AI_PROVIDER=groq`, `AI_BASE_URL` defaults to `https://api.groq.com/openai/v1`.
 
 Keep this only in backend hosting environment variables.
 
