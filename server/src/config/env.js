@@ -4,6 +4,10 @@ dotenv.config();
 
 const requiredInProduction = ["MONGO_URI", "JWT_SECRET", "CLIENT_URL"];
 const aiProvider = (process.env.AI_PROVIDER || "mock").trim().toLowerCase();
+const DEFAULT_AI_WEB_SEARCH_TIMEOUT_MS = 20000;
+const DEFAULT_AI_TEXT_TIMEOUT_MS = 20000;
+const DEFAULT_AI_MAX_OUTPUT_TOKENS = 2048;
+
 function positiveNumber(value, fallback) {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
@@ -57,10 +61,16 @@ export const env = {
   aiWebSearch: process.env.AI_WEB_SEARCH === "true",
   aiWebSearchTimeoutMs: positiveNumber(
     process.env.AI_WEB_SEARCH_TIMEOUT_MS,
-    10000,
+    DEFAULT_AI_WEB_SEARCH_TIMEOUT_MS,
   ),
-  aiTextTimeoutMs: positiveNumber(process.env.AI_TEXT_TIMEOUT_MS, 8000),
-  aiMaxOutputTokens: positiveNumber(process.env.AI_MAX_OUTPUT_TOKENS, 650),
+  aiTextTimeoutMs: positiveNumber(
+    process.env.AI_TEXT_TIMEOUT_MS,
+    DEFAULT_AI_TEXT_TIMEOUT_MS,
+  ),
+  aiMaxOutputTokens: positiveNumber(
+    process.env.AI_MAX_OUTPUT_TOKENS,
+    DEFAULT_AI_MAX_OUTPUT_TOKENS,
+  ),
   uploadDir:
     process.env.UPLOAD_DIR ||
     (process.env.NETLIFY ? "/tmp/nexia-ai-uploads" : "uploads"),

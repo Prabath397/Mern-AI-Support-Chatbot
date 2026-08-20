@@ -7,6 +7,14 @@ const MEMORY_INSTRUCTIONS =
 const WEB_SEARCH_INSTRUCTIONS =
   "You have access to live web search. Use it for current events, recent information, prices, schedules, or anything that may have changed. Do not say you cannot browse when web search is available.";
 const SECRET_PATTERNS = [/sk-[A-Za-z0-9_-]+/g, /Bearer\s+[A-Za-z0-9._-]+/gi];
+const TOKEN_LIMIT_REASONS = new Set([
+  "length",
+  "max_tokens",
+  "max_output_tokens",
+]);
+const MAX_CONTINUATION_ATTEMPTS = 2;
+const CONTINUATION_PROMPT =
+  "Continue the assistant answer exactly where it stopped. Do not restart, summarize, apologize, or repeat earlier content. Finish the remaining answer completely.";
 
 function estimateTokens(text) {
   return Math.ceil((text || "").length / 4);
@@ -77,6 +85,13 @@ function responseOutputText(data) {
     .trim();
 }
 
+function combineResponseParts(parts) {
+  return parts
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .join("\n\n");
+}
+
 function buildHistoryTranscript(messages) {
   return messages
     .slice(-20)
@@ -87,6 +102,17 @@ function buildHistoryTranscript(messages) {
     .join("\n");
 }
 
+function isResponsesTokenLimit(data) {
+  const reason =
+    data.incomplete_details?.reason || data.status_details?.reason || "";
+  return data.status === "incomplete" && TOKEN_LIMIT_REASONS.has(reason);
+}
+
+function isChatCompletionTokenLimit(data) {
+  const reason = data.choices?.[0]?.finish_reason || "";
+  return TOKEN_LIMIT_REASONS.has(reason);
+}
+
 function isTimeoutError(error) {
   return (
     error?.name === "TimeoutError" ||
@@ -95,30 +121,37 @@ function isTimeoutError(error) {
   );
 }
 
-async function callOpenAiResponsesProvider({
+async function fetchOpenAiResponses({
   messages,
   systemPrompt,
-  userMessage,
+  includeWebSearch = false,
+  timeoutMs,
 }) {
   const baseUrl = env.aiBaseUrl.replace(/\/$/, "");
-  const signal = AbortSignal.timeout(env.aiWebSearchTimeoutMs);
+  const body = {
+    model: env.aiModel || "gpt-5",
+    instructions: `${systemPrompt}\n\n${MEMORY_INSTRUCTIONS}\n\n${MATH_FORMATTING_INSTRUCTIONS}${
+      includeWebSearch ? `\n\n${WEB_SEARCH_INSTRUCTIONS}` : ""
+    }`,
+    input: messages.slice(-8).map(({ role, content }) => ({ role, content })),
+    max_output_tokens: env.aiMaxOutputTokens,
+    truncation: "auto",
+    store: false,
+  };
+
+  if (includeWebSearch) {
+    body.tools = [{ type: "web_search", search_context_size: "low" }];
+    body.tool_choice = "auto";
+  }
+
   const response = await fetch(`${baseUrl}/responses`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${env.aiApiKey}`,
     },
-    body: JSON.stringify({
-      model: env.aiModel || "gpt-5",
-      instructions: `${systemPrompt}\n\n${MEMORY_INSTRUCTIONS}\n\n${MATH_FORMATTING_INSTRUCTIONS}\n\n${WEB_SEARCH_INSTRUCTIONS}`,
-      input: messages.slice(-6).map(({ role, content }) => ({ role, content })),
-      tools: [{ type: "web_search", search_context_size: "low" }],
-      tool_choice: "auto",
-      max_output_tokens: env.aiMaxOutputTokens,
-      truncation: "auto",
-      store: false,
-    }),
-    signal,
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(timeoutMs),
   });
 
   if (!response.ok) {
@@ -128,9 +161,39 @@ async function callOpenAiResponsesProvider({
     );
   }
 
-  const data = await response.json();
+  return response.json();
+}
+
+async function callOpenAiResponsesProvider({
+  messages,
+  systemPrompt,
+  userMessage,
+}) {
+  const parts = [];
+  let requestMessages = messages;
+  let data = null;
+
+  for (let attempt = 0; attempt <= MAX_CONTINUATION_ATTEMPTS; attempt += 1) {
+    data = await fetchOpenAiResponses({
+      messages: requestMessages,
+      systemPrompt,
+      includeWebSearch: true,
+      timeoutMs: env.aiWebSearchTimeoutMs,
+    });
+
+    const content = responseOutputText(data);
+    if (content) parts.push(content);
+    if (!isResponsesTokenLimit(data)) break;
+
+    requestMessages = [
+      ...messages.slice(-6),
+      { role: "assistant", content: combineResponseParts(parts) },
+      { role: "user", content: CONTINUATION_PROMPT },
+    ];
+  }
+
   const content =
-    responseOutputText(data) || "I could not generate a response.";
+    combineResponseParts(parts) || "I could not generate a response.";
 
   return {
     content,
@@ -144,35 +207,30 @@ async function callOpenAiResponsesTextProvider({
   systemPrompt,
   userMessage,
 }) {
-  const baseUrl = env.aiBaseUrl.replace(/\/$/, "");
-  const signal = AbortSignal.timeout(env.aiTextTimeoutMs);
-  const response = await fetch(`${baseUrl}/responses`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${env.aiApiKey}`,
-    },
-    body: JSON.stringify({
-      model: env.aiModel || "gpt-5",
-      instructions: `${systemPrompt}\n\n${MEMORY_INSTRUCTIONS}\n\n${MATH_FORMATTING_INSTRUCTIONS}`,
-      input: messages.slice(-6).map(({ role, content }) => ({ role, content })),
-      max_output_tokens: env.aiMaxOutputTokens,
-      truncation: "auto",
-      store: false,
-    }),
-    signal,
-  });
+  const parts = [];
+  let requestMessages = messages;
+  let data = null;
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `OpenAI Responses text request failed with ${response.status}: ${errorText.slice(0, 300)}`,
-    );
+  for (let attempt = 0; attempt <= MAX_CONTINUATION_ATTEMPTS; attempt += 1) {
+    data = await fetchOpenAiResponses({
+      messages: requestMessages,
+      systemPrompt,
+      timeoutMs: env.aiTextTimeoutMs,
+    });
+
+    const content = responseOutputText(data);
+    if (content) parts.push(content);
+    if (!isResponsesTokenLimit(data)) break;
+
+    requestMessages = [
+      ...messages.slice(-6),
+      { role: "assistant", content: combineResponseParts(parts) },
+      { role: "user", content: CONTINUATION_PROMPT },
+    ];
   }
 
-  const data = await response.json();
   const content =
-    responseOutputText(data) || "I could not generate a response.";
+    combineResponseParts(parts) || "I could not generate a response.";
 
   return {
     content,
@@ -183,48 +241,68 @@ async function callOpenAiResponsesTextProvider({
 
 async function callOpenAiCompatibleProvider({ messages, systemPrompt }) {
   const baseUrl = env.aiBaseUrl.replace(/\/$/, "");
-  const signal = AbortSignal.timeout(env.aiTextTimeoutMs);
   const latestUserMessage =
     [...messages].reverse().find((message) => message.role === "user")
       ?.content || "";
   const transcript = buildHistoryTranscript(messages);
-  const response = await fetch(`${baseUrl}/chat/completions`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${env.aiApiKey}`,
+  const baseMessages = [
+    {
+      role: "system",
+      content: `${systemPrompt}\n\n${MEMORY_INSTRUCTIONS}\n\n${MATH_FORMATTING_INSTRUCTIONS}`,
     },
-    body: JSON.stringify({
-      model: env.aiModel || "gpt-4.1-mini",
-      messages: [
-        {
-          role: "system",
-          content: `${systemPrompt}\n\n${MEMORY_INSTRUCTIONS}\n\n${MATH_FORMATTING_INSTRUCTIONS}`,
-        },
-        {
-          role: "user",
-          content: `Conversation transcript:\n${transcript}\n\nAnswer the latest user message using the transcript as context.\nLatest user message: ${latestUserMessage}`,
-        },
-      ],
-      temperature: 0.3,
-      max_tokens: env.aiMaxOutputTokens,
-    }),
-    signal,
-  });
+    {
+      role: "user",
+      content: `Conversation transcript:\n${transcript}\n\nAnswer the latest user message using the transcript as context.\nLatest user message: ${latestUserMessage}`,
+    },
+  ];
+  const parts = [];
+  let data = null;
+  let requestMessages = baseMessages;
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `AI provider request failed with ${response.status}: ${errorText.slice(0, 300)}`,
-    );
+  for (let attempt = 0; attempt <= MAX_CONTINUATION_ATTEMPTS; attempt += 1) {
+    const response = await fetch(`${baseUrl}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${env.aiApiKey}`,
+      },
+      body: JSON.stringify({
+        model: env.aiModel || "gpt-4.1-mini",
+        messages: requestMessages,
+        temperature: 0.3,
+        max_tokens: env.aiMaxOutputTokens,
+      }),
+      signal: AbortSignal.timeout(env.aiTextTimeoutMs),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(
+        `AI provider request failed with ${response.status}: ${errorText.slice(0, 300)}`,
+      );
+    }
+
+    data = await response.json();
+    const content = data.choices?.[0]?.message?.content || "";
+    if (content) parts.push(content);
+    if (!isChatCompletionTokenLimit(data)) break;
+
+    requestMessages = [
+      ...baseMessages,
+      { role: "assistant", content: combineResponseParts(parts) },
+      { role: "user", content: CONTINUATION_PROMPT },
+    ];
   }
 
-  const data = await response.json();
   const content =
-    data.choices?.[0]?.message?.content || "I could not generate a response.";
+    combineResponseParts(parts) || "I could not generate a response.";
   return {
     content,
-    tokenUsage: buildTokenUsage(data, content, messages.at(-1)?.content || ""),
+    tokenUsage: buildTokenUsage(
+      data || {},
+      content,
+      messages.at(-1)?.content || "",
+    ),
     provider: env.aiProvider,
   };
 }

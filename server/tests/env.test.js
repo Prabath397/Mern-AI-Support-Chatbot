@@ -62,12 +62,12 @@ describe("AI provider environment defaults", () => {
     expect(env.aiModel).toBe("custom-model");
   });
 
-  it("uses serverless-friendly AI timeout defaults", async () => {
+  it("uses AI defaults that allow full-length responses", async () => {
     const { env } = await loadEnv();
 
-    expect(env.aiWebSearchTimeoutMs).toBe(10000);
-    expect(env.aiTextTimeoutMs).toBe(8000);
-    expect(env.aiMaxOutputTokens).toBe(650);
+    expect(env.aiWebSearchTimeoutMs).toBe(20000);
+    expect(env.aiTextTimeoutMs).toBe(20000);
+    expect(env.aiMaxOutputTokens).toBe(2048);
   });
 
   it("lets AI timeout and output settings be overridden", async () => {
