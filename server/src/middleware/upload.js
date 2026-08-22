@@ -13,9 +13,27 @@ const allowedMimeTypes = new Set([
   "application/json",
   "application/pdf",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "audio/aac",
+  "audio/flac",
+  "audio/mpeg",
+  "audio/mp3",
+  "audio/mp4",
+  "audio/ogg",
+  "audio/wav",
+  "audio/webm",
+  "audio/x-wav",
+  "image/avif",
+  "image/gif",
+  "image/heic",
+  "image/heif",
   "image/jpeg",
+  "image/jpg",
   "image/png",
   "image/webp",
+  "video/mp4",
+  "video/mpeg",
+  "video/quicktime",
+  "video/webm",
 ]);
 
 const isServerless =
@@ -46,7 +64,7 @@ export const chatUpload = multer({
       return cb(
         new ApiError(
           400,
-          "Unsupported attachment type. Use TXT, Markdown, CSV, JSON, PDF, DOCX, PNG, JPG, or WEBP.",
+          "Unsupported attachment type. Use text files, PDF, DOCX, common image formats, MP3, WAV, MP4, MOV, or WEBM.",
         ),
       );
     }

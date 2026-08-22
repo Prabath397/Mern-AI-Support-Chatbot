@@ -12,7 +12,7 @@ Nexia AI is a modern full-stack AI chat assistant with authentication, role-awar
 - Admin dashboard with user and system controls
 - Conversation rename, delete, search, pin, regenerate, and stop response controls
 - Markdown, tables, code blocks, math, and copy actions in assistant replies
-- TXT, Markdown, CSV, JSON, PDF, DOCX, and image attachment support
+- TXT, Markdown, CSV, JSON, PDF, DOCX, image, audio, and video attachment support
 - Light and dark mode
 - Responsive layout for desktop and mobile
 

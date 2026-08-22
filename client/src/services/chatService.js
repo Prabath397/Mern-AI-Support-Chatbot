@@ -20,10 +20,7 @@ export const chatService = {
     if (conversationId) formData.append("conversationId", conversationId);
     files.forEach((file) => formData.append("attachments", file));
 
-    return api.post("/chat", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-      signal,
-    });
+    return api.post("/chat", formData, { signal });
   },
   downloadAttachment: (messageId, attachmentId) =>
     api.get(`/attachments/messages/${messageId}/attachments/${attachmentId}`, {

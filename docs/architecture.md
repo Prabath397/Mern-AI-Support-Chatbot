@@ -13,6 +13,6 @@ Data flow:
 3. Express verifies the JWT and active user status.
 4. The conversation ownership is verified or a new conversation is created.
 5. The user message is stored.
-6. Optional attachments are stored privately, with text extracted from TXT, Markdown, CSV, JSON, PDF, and DOCX files. Image attachments are processed with local Tesseract.js OCR and the extracted text is added to the AI context.
-7. Recent history, attachment context, and the saved system prompt are passed to the AI service.
+6. Optional attachments are stored privately, with text extracted from TXT, Markdown, CSV, JSON, PDF, DOCX, and OCR-readable image files.
+7. Recent history, attachment context, and the saved system prompt are passed to the AI service. When Gemini is selected, supported image, PDF, audio, and video attachments are also sent as inline media for multimodal understanding.
 8. The assistant message is stored and returned to the client.

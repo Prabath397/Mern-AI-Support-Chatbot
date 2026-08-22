@@ -112,8 +112,10 @@ AI_TEXT_TIMEOUT_MS=20000
 AI_MAX_OUTPUT_TOKENS=2048
 ```
 
-## OCR
+## Attachments
 
-Image OCR runs inside the backend with `tesseract.js` and the packaged English language data from `@tesseract.js-data/eng`. It does not require a paid OCR API. OCR extracts readable text from PNG, JPG, and WEBP uploads, then passes that text into the configured AI model.
+Image OCR runs inside the backend with `tesseract.js` and the packaged English language data from `@tesseract.js-data/eng`. It does not require a paid OCR API. OCR extracts readable text from common image uploads and passes that text into the configured AI model.
+
+When `AI_PROVIDER=gemini`, supported image, PDF, audio, and video attachments are also sent to Gemini as inline media so the model can reason about the actual file content. Other providers use extracted text only.
 
 Netlify Functions use temporary local storage. Uploaded attachments can be processed during a request, but stored attachment downloads are not durable across function instances. Move attachment storage to a cloud bucket if permanent downloads are required.

@@ -46,7 +46,7 @@ export default function ChatInput({ disabled, onSend, onStop }) {
             multiple
             disabled={disabled}
             onChange={updateFiles}
-            accept=".txt,.md,.csv,.json,.pdf,.docx,image/png,image/jpeg,image/webp"
+            accept=".txt,.md,.csv,.json,.pdf,.docx,image/*,audio/*,video/*"
           />
           {files.length ? (
             <div className="attachment-preview" aria-live="polite">

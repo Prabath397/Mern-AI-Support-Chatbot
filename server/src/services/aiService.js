@@ -1,3 +1,4 @@
+import fs from "fs/promises";
 import { env } from "../config/env.js";
 
 const MATH_FORMATTING_INSTRUCTIONS =
@@ -149,6 +150,32 @@ function geminiModelPath(model) {
   return selectedModel.startsWith("models/")
     ? selectedModel
     : `models/${selectedModel}`;
+}
+
+function canSendGeminiInlineData(attachment) {
+  return (
+    attachment?.path &&
+    (attachment.mimeType === "application/pdf" ||
+      attachment.mimeType?.startsWith("image/") ||
+      attachment.mimeType?.startsWith("audio/") ||
+      attachment.mimeType?.startsWith("video/"))
+  );
+}
+
+async function buildGeminiAttachmentParts(attachments = []) {
+  const supportedAttachments = attachments.filter(canSendGeminiInlineData);
+
+  return Promise.all(
+    supportedAttachments.map(async (attachment) => {
+      const data = await fs.readFile(attachment.path, "base64");
+      return {
+        inlineData: {
+          mimeType: attachment.mimeType,
+          data,
+        },
+      };
+    }),
+  );
 }
 
 async function fetchOpenAiResponses({
@@ -337,12 +364,17 @@ async function callOpenAiCompatibleProvider({ messages, systemPrompt }) {
   };
 }
 
-async function callGeminiProvider({ messages, systemPrompt }) {
+async function callGeminiProvider({
+  messages,
+  systemPrompt,
+  attachments = [],
+}) {
   const baseUrl = env.aiBaseUrl.replace(/\/$/, "");
   const latestUserMessage =
     [...messages].reverse().find((message) => message.role === "user")
       ?.content || "";
   const transcript = buildHistoryTranscript(messages);
+  const attachmentParts = await buildGeminiAttachmentParts(attachments);
   const systemInstruction = {
     parts: [
       {
@@ -357,6 +389,7 @@ async function callGeminiProvider({ messages, systemPrompt }) {
         {
           text: `Conversation transcript:\n${transcript}\n\nAnswer the latest user message using the transcript as context.\nLatest user message: ${latestUserMessage}`,
         },
+        ...attachmentParts,
       ],
     },
   ];
@@ -428,6 +461,7 @@ export async function generateAssistantReply({
   userMessage,
   history,
   systemPrompt,
+  attachments = [],
 }) {
   const useMock = env.aiProvider === "mock" || !env.aiApiKey;
   if (useMock) {
@@ -472,6 +506,7 @@ export async function generateAssistantReply({
       return await callGeminiProvider({
         messages: history,
         systemPrompt,
+        attachments,
       });
     }
 

@@ -1,3 +1,6 @@
+import fs from "fs/promises";
+import os from "os";
+import path from "path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 function jsonResponse(data) {
@@ -112,6 +115,9 @@ describe("AI service continuations", () => {
   });
 
   it("calls Gemini generateContent with system instructions and history", async () => {
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "nexia-ai-test-"));
+    const imagePath = path.join(tempDir, "sample.png");
+    await fs.writeFile(imagePath, Buffer.from("fake image bytes"));
     const fetch = vi.fn().mockResolvedValueOnce(
       jsonResponse({
         candidates: [
@@ -140,6 +146,12 @@ describe("AI service continuations", () => {
       userMessage: "Explain APIs",
       history: [{ role: "user", content: "Explain APIs" }],
       systemPrompt: "You are helpful.",
+      attachments: [
+        {
+          path: imagePath,
+          mimeType: "image/png",
+        },
+      ],
     });
 
     expect(result).toMatchObject({
@@ -165,9 +177,17 @@ describe("AI service continuations", () => {
         expect.objectContaining({
           text: expect.stringContaining("Explain APIs"),
         }),
+        {
+          inlineData: {
+            mimeType: "image/png",
+            data: Buffer.from("fake image bytes").toString("base64"),
+          },
+        },
       ],
     });
     expect(body.generationConfig.maxOutputTokens).toBe(8);
+
+    await fs.rm(tempDir, { recursive: true, force: true });
   });
 
   it("continues Gemini replies that hit max output tokens", async () => {

@@ -73,6 +73,7 @@ export const sendChatMessage = asyncHandler(async (req, res) => {
       userMessage: augmentedUserContent,
       history: historyForAi,
       systemPrompt: setting.systemPrompt,
+      attachments,
     });
   } catch (error) {
     console.error("AI provider error:", error.message);
@@ -157,6 +158,7 @@ export const regenerateChatMessage = asyncHandler(async (req, res) => {
       ),
       history: historyForAi,
       systemPrompt: setting.systemPrompt,
+      attachments: latestUserMessage.attachments || [],
     });
   } catch (error) {
     console.error("AI provider error:", error.message);
