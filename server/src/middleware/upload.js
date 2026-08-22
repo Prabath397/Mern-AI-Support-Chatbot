@@ -38,6 +38,7 @@ const allowedMimeTypes = new Set([
 
 const isServerless =
   Boolean(process.env.NETLIFY) ||
+  Boolean(process.env.VERCEL) ||
   Boolean(process.env.AWS_LAMBDA_FUNCTION_NAME) ||
   Boolean(process.env.LAMBDA_TASK_ROOT);
 const uploadPath = isServerless

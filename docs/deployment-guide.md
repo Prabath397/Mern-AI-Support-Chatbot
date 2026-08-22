@@ -2,7 +2,7 @@
 
 ## Netlify
 
-This project is configured for a Netlify-only deployment. Netlify builds the Vite client and serves the Express API through `server/netlify/functions/api.js`.
+This project can run on Netlify or Vercel. Netlify builds the Vite client and serves the Express API through `server/netlify/functions/api.js`.
 
 Connect the repository in Netlify and use the checked-in `netlify.toml` settings:
 
@@ -42,6 +42,18 @@ CLIENT_URL=https://your-site-name.netlify.app
 ```
 
 `VITE_API_BASE_URL` is optional on Netlify because the client defaults to `/api` in production. Set it only if you intentionally point the frontend at a different API URL.
+
+## Vercel
+
+The checked-in `vercel.json` builds the Vite client from `client/` and serves the Express API through `api/[...path].js`.
+
+Set the same backend environment variables in Vercel. Use your Vercel site URL for `CLIENT_URL`, for example:
+
+```env
+CLIENT_URL=https://your-site-name.vercel.app
+```
+
+`VITE_API_BASE_URL` is optional on Vercel because the client defaults to `/api` in production.
 
 ## AI Provider
 
@@ -118,4 +130,4 @@ Image OCR runs inside the backend with `tesseract.js` and the packaged English l
 
 When `AI_PROVIDER=gemini`, supported image, PDF, audio, and video attachments are also sent to Gemini as inline media so the model can reason about the actual file content. Other providers use extracted text only.
 
-Netlify Functions use temporary local storage. Uploaded attachments can be processed during a request, but stored attachment downloads are not durable across function instances. Move attachment storage to a cloud bucket if permanent downloads are required.
+Netlify and Vercel Functions use temporary local storage. Uploaded attachments can be processed during a request, but stored attachment downloads are not durable across function instances. Move attachment storage to a cloud bucket if permanent downloads are required.

@@ -114,6 +114,57 @@ describe("AI service continuations", () => {
     expect(secondBody.input.at(-1).content).toContain("Continue");
   });
 
+  it("sends image attachments to OpenAI Responses as visual input", async () => {
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "nexia-ai-test-"));
+    const imagePath = path.join(tempDir, "game.png");
+    await fs.writeFile(imagePath, Buffer.from("fake image bytes"));
+    const fetch = vi.fn().mockResolvedValueOnce(
+      jsonResponse({
+        output_text: "That looks like a fantasy card game.",
+        status: "completed",
+        usage: { input_tokens: 20, output_tokens: 8, total_tokens: 28 },
+      }),
+    );
+    vi.stubGlobal("fetch", fetch);
+
+    try {
+      const { generateAssistantReply } = await loadAiService({
+        AI_PROVIDER: "openai",
+        AI_WEB_SEARCH: "false",
+      });
+      const result = await generateAssistantReply({
+        userMessage: "What is this game?",
+        history: [{ role: "user", content: "What is this game?" }],
+        systemPrompt: "You are helpful.",
+        attachments: [
+          {
+            path: imagePath,
+            mimeType: "image/png",
+          },
+        ],
+      });
+
+      expect(result).toMatchObject({
+        content: "That looks like a fantasy card game.",
+        provider: "openai-text-fallback",
+      });
+      const body = JSON.parse(fetch.mock.calls[0][1].body);
+      expect(body.input[0].content).toEqual([
+        {
+          type: "input_text",
+          text: "What is this game?",
+        },
+        {
+          type: "input_image",
+          image_url: `data:image/png;base64,${Buffer.from("fake image bytes").toString("base64")}`,
+          detail: "auto",
+        },
+      ]);
+    } finally {
+      await fs.rm(tempDir, { recursive: true, force: true });
+    }
+  });
+
   it("calls Gemini generateContent with system instructions and history", async () => {
     const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "nexia-ai-test-"));
     const imagePath = path.join(tempDir, "sample.png");

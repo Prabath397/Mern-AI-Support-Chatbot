@@ -162,6 +162,10 @@ function canSendGeminiInlineData(attachment) {
   );
 }
 
+function canSendOpenAiImageData(attachment) {
+  return attachment?.path && attachment.mimeType?.startsWith("image/");
+}
+
 async function buildGeminiAttachmentParts(attachments = []) {
   const supportedAttachments = attachments.filter(canSendGeminiInlineData);
 
@@ -178,9 +182,51 @@ async function buildGeminiAttachmentParts(attachments = []) {
   );
 }
 
+async function buildOpenAiImageParts(attachments = []) {
+  const supportedAttachments = attachments.filter(canSendOpenAiImageData);
+
+  return Promise.all(
+    supportedAttachments.map(async (attachment) => {
+      const data = await fs.readFile(attachment.path, "base64");
+      return {
+        type: "input_image",
+        image_url: `data:${attachment.mimeType};base64,${data}`,
+        detail: "auto",
+      };
+    }),
+  );
+}
+
+async function buildOpenAiResponsesInput(messages, attachments = []) {
+  const input = messages.slice(-8).map(({ role, content }) => ({
+    role,
+    content,
+  }));
+  const imageParts = await buildOpenAiImageParts(attachments);
+
+  if (imageParts.length) {
+    const latestUserMessage = [...input]
+      .reverse()
+      .find((message) => message.role === "user");
+
+    if (latestUserMessage) {
+      latestUserMessage.content = [
+        {
+          type: "input_text",
+          text: latestUserMessage.content || "Please inspect the uploaded image.",
+        },
+        ...imageParts,
+      ];
+    }
+  }
+
+  return input;
+}
+
 async function fetchOpenAiResponses({
   messages,
   systemPrompt,
+  attachments = [],
   includeWebSearch = false,
   timeoutMs,
 }) {
@@ -190,7 +236,7 @@ async function fetchOpenAiResponses({
     instructions: `${systemPrompt}\n\n${MEMORY_INSTRUCTIONS}\n\n${MATH_FORMATTING_INSTRUCTIONS}${
       includeWebSearch ? `\n\n${WEB_SEARCH_INSTRUCTIONS}` : ""
     }`,
-    input: messages.slice(-8).map(({ role, content }) => ({ role, content })),
+    input: await buildOpenAiResponsesInput(messages, attachments),
     max_output_tokens: env.aiMaxOutputTokens,
     truncation: "auto",
     store: false,
@@ -225,6 +271,7 @@ async function callOpenAiResponsesProvider({
   messages,
   systemPrompt,
   userMessage,
+  attachments = [],
 }) {
   const parts = [];
   let requestMessages = messages;
@@ -234,6 +281,7 @@ async function callOpenAiResponsesProvider({
     data = await fetchOpenAiResponses({
       messages: requestMessages,
       systemPrompt,
+      attachments: attempt === 0 ? attachments : [],
       includeWebSearch: true,
       timeoutMs: env.aiWebSearchTimeoutMs,
     });
@@ -263,6 +311,7 @@ async function callOpenAiResponsesTextProvider({
   messages,
   systemPrompt,
   userMessage,
+  attachments = [],
 }) {
   const parts = [];
   let requestMessages = messages;
@@ -272,6 +321,7 @@ async function callOpenAiResponsesTextProvider({
     data = await fetchOpenAiResponses({
       messages: requestMessages,
       systemPrompt,
+      attachments: attempt === 0 ? attachments : [],
       timeoutMs: env.aiTextTimeoutMs,
     });
 
@@ -480,12 +530,25 @@ export async function generateAssistantReply({
   }
 
   try {
-    if (env.aiProvider === "openai" && env.aiWebSearch) {
+    if (
+      env.aiProvider === "openai" &&
+      (env.aiWebSearch || attachments.some(canSendOpenAiImageData))
+    ) {
       try {
-        return await callOpenAiResponsesProvider({
+        if (env.aiWebSearch) {
+          return await callOpenAiResponsesProvider({
+            messages: history,
+            systemPrompt,
+            userMessage,
+            attachments,
+          });
+        }
+
+        return await callOpenAiResponsesTextProvider({
           messages: history,
           systemPrompt,
           userMessage,
+          attachments,
         });
       } catch (webSearchError) {
         if (!isTimeoutError(webSearchError)) throw webSearchError;
@@ -498,6 +561,7 @@ export async function generateAssistantReply({
           messages: history,
           systemPrompt: `${systemPrompt}\n\nLive web search was attempted but timed out. Answer from general knowledge and clearly say if current information may need checking.`,
           userMessage,
+          attachments,
         });
       }
     }

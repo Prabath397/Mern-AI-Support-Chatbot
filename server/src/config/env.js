@@ -78,7 +78,9 @@ export const env = {
   ),
   uploadDir:
     process.env.UPLOAD_DIR ||
-    (process.env.NETLIFY ? "/tmp/nexia-ai-uploads" : "uploads"),
+    (process.env.NETLIFY || process.env.VERCEL
+      ? "/tmp/nexia-ai-uploads"
+      : "uploads"),
   maxFileSizeMb: Number(process.env.MAX_FILE_SIZE_MB || 8),
   isProduction: process.env.NODE_ENV === "production",
   isTest: process.env.NODE_ENV === "test",
