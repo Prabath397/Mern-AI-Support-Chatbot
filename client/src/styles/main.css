@@ -706,6 +706,10 @@ textarea:focus {
   line-height: 1.72;
 }
 
+.chat-message.user .markdown-body {
+  white-space: pre-wrap;
+}
+
 .markdown-body p:first-child {
   margin-top: 0;
 }

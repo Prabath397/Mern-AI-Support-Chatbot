@@ -8,6 +8,7 @@ async function loadEnv(overrides = {}) {
   vi.stubEnv("AI_API_KEY", "");
   vi.stubEnv("GROQ_API_KEY", "");
   vi.stubEnv("DEEPSEEK_API_KEY", "");
+  vi.stubEnv("GEMINI_API_KEY", "");
   vi.stubEnv("AI_MODEL", "");
   vi.stubEnv("AI_WEB_SEARCH_TIMEOUT_MS", "");
   vi.stubEnv("AI_TEXT_TIMEOUT_MS", "");
@@ -47,6 +48,20 @@ describe("AI provider environment defaults", () => {
     expect(env.aiBaseUrl).toBe("https://api.deepseek.com");
     expect(env.aiApiKey).toBe("deepseek-test-key");
     expect(env.aiModel).toBe("deepseek-v4-flash");
+  });
+
+  it("uses Gemini defaults when the Gemini provider is selected", async () => {
+    const { env } = await loadEnv({
+      AI_PROVIDER: "gemini",
+      GEMINI_API_KEY: "gemini-test-key",
+    });
+
+    expect(env.aiProvider).toBe("gemini");
+    expect(env.aiBaseUrl).toBe(
+      "https://generativelanguage.googleapis.com/v1beta",
+    );
+    expect(env.aiApiKey).toBe("gemini-test-key");
+    expect(env.aiModel).toBe("gemini-3.1-flash-lite");
   });
 
   it("lets generic AI settings override provider presets", async () => {

@@ -28,6 +28,7 @@ Set:
 - `AI_API_KEY`
 - `GROQ_API_KEY`
 - `DEEPSEEK_API_KEY`
+- `GEMINI_API_KEY`
 - `AI_MODEL`
 - `AI_WEB_SEARCH`
 - `AI_WEB_SEARCH_TIMEOUT_MS`
@@ -77,6 +78,16 @@ AI_MODEL=openai/gpt-oss-120b
 
 You can use `AI_API_KEY` instead of `GROQ_API_KEY` for Groq. When `AI_PROVIDER=groq`, `AI_BASE_URL` defaults to `https://api.groq.com/openai/v1`.
 
+For Gemini, set:
+
+```env
+AI_PROVIDER=gemini
+GEMINI_API_KEY=your_gemini_key
+AI_MODEL=gemini-3.1-flash-lite
+```
+
+You can use `AI_API_KEY` instead of `GEMINI_API_KEY` for Gemini. When `AI_PROVIDER=gemini`, `AI_BASE_URL` defaults to `https://generativelanguage.googleapis.com/v1beta`.
+
 Keep this only in backend hosting environment variables.
 
 ## Web Search
@@ -91,7 +102,7 @@ AI_MODEL=gpt-5
 AI_WEB_SEARCH=true
 ```
 
-Web search is only used when `AI_PROVIDER=openai` and `AI_WEB_SEARCH=true`. Other providers continue to use the OpenAI-compatible chat completions path.
+Web search is only used when `AI_PROVIDER=openai` and `AI_WEB_SEARCH=true`. Gemini uses the Gemini Generate Content API, while other providers continue to use the OpenAI-compatible chat completions path.
 
 Netlify Functions have a strict request runtime limit. Keep AI timeouts comfortably below that limit so difficult web-search questions can fall back gracefully instead of becoming `502` or `504` gateway errors for remote users. The defaults are:
 

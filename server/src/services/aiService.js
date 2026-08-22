@@ -12,6 +12,7 @@ const TOKEN_LIMIT_REASONS = new Set([
   "max_tokens",
   "max_output_tokens",
 ]);
+const GEMINI_TOKEN_LIMIT_REASONS = new Set(["MAX_TOKENS"]);
 const MAX_CONTINUATION_ATTEMPTS = 2;
 const CONTINUATION_PROMPT =
   "Continue the assistant answer exactly where it stopped. Do not restart, summarize, apologize, or repeat earlier content. Finish the remaining answer completely.";
@@ -64,12 +65,20 @@ function providerFallbackReply(content, error) {
 }
 
 function buildTokenUsage(data, fallbackContent, userMessage) {
+  const usage = data.usage || data.usageMetadata || {};
+
   return {
-    prompt: data.usage?.prompt_tokens || data.usage?.input_tokens || 0,
-    completion: data.usage?.completion_tokens || data.usage?.output_tokens || 0,
+    prompt:
+      usage.prompt_tokens || usage.input_tokens || usage.promptTokenCount || 0,
+    completion:
+      usage.completion_tokens ||
+      usage.output_tokens ||
+      usage.candidatesTokenCount ||
+      0,
     total:
-      data.usage?.total_tokens ||
-      data.usage?.total ||
+      usage.total_tokens ||
+      usage.total ||
+      usage.totalTokenCount ||
       estimateTokens(fallbackContent) + estimateTokens(userMessage),
   };
 }
@@ -113,12 +122,33 @@ function isChatCompletionTokenLimit(data) {
   return TOKEN_LIMIT_REASONS.has(reason);
 }
 
+function isGeminiTokenLimit(data) {
+  const reason = data.candidates?.[0]?.finishReason || "";
+  return GEMINI_TOKEN_LIMIT_REASONS.has(reason);
+}
+
 function isTimeoutError(error) {
   return (
     error?.name === "TimeoutError" ||
     error?.name === "AbortError" ||
     /aborted|timeout/i.test(error?.message || "")
   );
+}
+
+function geminiOutputText(data) {
+  return (data.candidates || [])
+    .flatMap((candidate) => candidate.content?.parts || [])
+    .filter((part) => part.text)
+    .map((part) => part.text)
+    .join("\n")
+    .trim();
+}
+
+function geminiModelPath(model) {
+  const selectedModel = model || "gemini-3.1-flash-lite";
+  return selectedModel.startsWith("models/")
+    ? selectedModel
+    : `models/${selectedModel}`;
 }
 
 async function fetchOpenAiResponses({
@@ -307,6 +337,93 @@ async function callOpenAiCompatibleProvider({ messages, systemPrompt }) {
   };
 }
 
+async function callGeminiProvider({ messages, systemPrompt }) {
+  const baseUrl = env.aiBaseUrl.replace(/\/$/, "");
+  const latestUserMessage =
+    [...messages].reverse().find((message) => message.role === "user")
+      ?.content || "";
+  const transcript = buildHistoryTranscript(messages);
+  const systemInstruction = {
+    parts: [
+      {
+        text: `${systemPrompt}\n\n${MEMORY_INSTRUCTIONS}\n\n${MATH_FORMATTING_INSTRUCTIONS}`,
+      },
+    ],
+  };
+  const baseContents = [
+    {
+      role: "user",
+      parts: [
+        {
+          text: `Conversation transcript:\n${transcript}\n\nAnswer the latest user message using the transcript as context.\nLatest user message: ${latestUserMessage}`,
+        },
+      ],
+    },
+  ];
+  const parts = [];
+  let data = null;
+  let requestContents = baseContents;
+
+  for (let attempt = 0; attempt <= MAX_CONTINUATION_ATTEMPTS; attempt += 1) {
+    const response = await fetch(
+      `${baseUrl}/${geminiModelPath(env.aiModel)}:generateContent`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": env.aiApiKey,
+        },
+        body: JSON.stringify({
+          systemInstruction,
+          contents: requestContents,
+          generationConfig: {
+            temperature: 0.3,
+            maxOutputTokens: env.aiMaxOutputTokens,
+          },
+        }),
+        signal: AbortSignal.timeout(env.aiTextTimeoutMs),
+      },
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(
+        `Gemini request failed with ${response.status}: ${errorText.slice(0, 300)}`,
+      );
+    }
+
+    data = await response.json();
+    const content = geminiOutputText(data);
+    if (content) parts.push(content);
+    if (!isGeminiTokenLimit(data)) break;
+
+    requestContents = [
+      ...baseContents,
+      {
+        role: "model",
+        parts: [{ text: combineResponseParts(parts) }],
+      },
+      {
+        role: "user",
+        parts: [{ text: CONTINUATION_PROMPT }],
+      },
+    ];
+  }
+
+  const content =
+    combineResponseParts(parts) || "I could not generate a response.";
+
+  return {
+    content,
+    tokenUsage: buildTokenUsage(
+      data || {},
+      content,
+      messages.at(-1)?.content || "",
+    ),
+    provider: env.aiProvider,
+  };
+}
+
 export async function generateAssistantReply({
   userMessage,
   history,
@@ -349,6 +466,13 @@ export async function generateAssistantReply({
           userMessage,
         });
       }
+    }
+
+    if (env.aiProvider === "gemini") {
+      return await callGeminiProvider({
+        messages: history,
+        systemPrompt,
+      });
     }
 
     return await callOpenAiCompatibleProvider({

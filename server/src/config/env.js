@@ -34,6 +34,10 @@ const aiProviderDefaults = {
     baseUrl: "https://api.deepseek.com",
     model: "deepseek-v4-flash",
   },
+  gemini: {
+    baseUrl: "https://generativelanguage.googleapis.com/v1beta",
+    model: "gemini-3.1-flash-lite",
+  },
 };
 
 const selectedAiDefaults =
@@ -56,6 +60,7 @@ export const env = {
     process.env.AI_API_KEY ||
     (aiProvider === "groq" ? process.env.GROQ_API_KEY : "") ||
     (aiProvider === "deepseek" ? process.env.DEEPSEEK_API_KEY : "") ||
+    (aiProvider === "gemini" ? process.env.GEMINI_API_KEY : "") ||
     "",
   aiModel: process.env.AI_MODEL || selectedAiDefaults.model,
   aiWebSearch: process.env.AI_WEB_SEARCH === "true",
