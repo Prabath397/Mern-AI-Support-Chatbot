@@ -161,7 +161,7 @@ Secrets are ignored by the repository. Passwords are hashed before storage, prot
 
 ## Author
 
-Created by: Prabath397  
+Created by: Prabath Udayanga 
 Portfolio: [https://prabath397.github.io/](https://prabath397.github.io/)
 
 ## License
