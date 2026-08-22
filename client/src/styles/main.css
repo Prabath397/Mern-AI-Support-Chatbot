@@ -826,6 +826,31 @@ textarea:focus {
   cursor: pointer;
 }
 
+.attachment-image-button {
+  width: min(280px, 100%);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface-alt);
+  cursor: pointer;
+  padding: 0;
+}
+
+.attachment-image-button img {
+  display: block;
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+}
+
+.attachment-image-button span {
+  display: block;
+  overflow: hidden;
+  padding: 10px 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .suggestions {
   display: flex;
   flex-wrap: wrap;

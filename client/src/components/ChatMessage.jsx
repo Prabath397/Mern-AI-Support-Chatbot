@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
@@ -37,6 +37,56 @@ function normalizeMathMarkdown(content) {
       /(^|\n)\s*\[\s*([^\]\n]*(?:\\begin|\\frac|\\boxed|\\sqrt|\\sum|\\int|\\Longrightarrow|\\rightarrow)[\s\S]*?)\s*\](?=\n|$)/g,
       (_match, prefix, math) => `${prefix}\n$$\n${math.trim()}\n$$\n`,
     );
+}
+
+function isImageAttachment(attachment) {
+  return attachment.mimeType?.startsWith("image/");
+}
+
+function ImageAttachment({ messageId, attachment, onDownload }) {
+  const [imageUrl, setImageUrl] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    let objectUrl = "";
+
+    async function loadPreview() {
+      const response = await chatService.downloadAttachment(
+        messageId,
+        attachment._id,
+      );
+      objectUrl = URL.createObjectURL(response.data);
+      if (active) {
+        setImageUrl(objectUrl);
+      } else {
+        URL.revokeObjectURL(objectUrl);
+      }
+    }
+
+    loadPreview().catch(() => {
+      if (active) setImageUrl("");
+    });
+
+    return () => {
+      active = false;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [attachment._id, messageId]);
+
+  return (
+    <button
+      type="button"
+      onClick={() => onDownload(attachment)}
+      className="attachment-image-button"
+      title={`Download ${attachment.originalName}`}
+    >
+      {imageUrl ? (
+        <img src={imageUrl} alt={attachment.originalName} />
+      ) : (
+        <span>{attachment.originalName}</span>
+      )}
+    </button>
+  );
 }
 
 export default function ChatMessage({
@@ -109,21 +159,30 @@ export default function ChatMessage({
       </div>
       {message.attachments?.length ? (
         <div className="attachment-list" aria-label="Message attachments">
-          {message.attachments.map((attachment) => (
-            <button
-              key={attachment._id}
-              type="button"
-              onClick={() => downloadAttachment(attachment)}
-              className="attachment-chip"
-              title={
-                attachment.hasExtractedText
-                  ? "Text was extracted for AI context"
-                  : "Download attachment"
-              }
-            >
-              {attachment.originalName}
-            </button>
-          ))}
+          {message.attachments.map((attachment) =>
+            isImageAttachment(attachment) ? (
+              <ImageAttachment
+                key={attachment._id}
+                messageId={message._id}
+                attachment={attachment}
+                onDownload={downloadAttachment}
+              />
+            ) : (
+              <button
+                key={attachment._id}
+                type="button"
+                onClick={() => downloadAttachment(attachment)}
+                className="attachment-chip"
+                title={
+                  attachment.hasExtractedText
+                    ? "Text was extracted for AI context"
+                    : "Download attachment"
+                }
+              >
+                {attachment.originalName}
+              </button>
+            ),
+          )}
         </div>
       ) : null}
     </article>
