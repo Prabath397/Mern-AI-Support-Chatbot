@@ -3,6 +3,7 @@ import path from "path";
 import engData from "@tesseract.js-data/eng";
 import mammoth from "mammoth";
 import Tesseract from "tesseract.js";
+import { env } from "../config/env.js";
 
 const TEXT_LIMIT = 12000;
 const OCR_TEXT_LIMIT = 6000;
@@ -19,6 +20,10 @@ function truncateOcr(text) {
 
 function isImage(file) {
   return file.mimetype.startsWith("image/");
+}
+
+function isVisionProviderConfigured() {
+  return ["gemini", "openai"].includes(env.aiProvider) && Boolean(env.aiApiKey);
 }
 
 async function extractImageText(file) {
@@ -75,6 +80,8 @@ async function extractText(file) {
   }
 
   if (isImage(file)) {
+    if (isVisionProviderConfigured()) return "";
+
     try {
       return await extractImageText(file);
     } catch (error) {
